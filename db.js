@@ -2,10 +2,10 @@ const { Client } = require('pg')
 const encryptor = require('simple-encryptor')('manhhuy-v-poker-keyS');
 
 const dbConfig = {
-  user: 'kbwmtdtmwnkiir',
-  host: 'ec2-52-44-31-100.compute-1.amazonaws.com',
-  database: 'd9it6fpimg5jsn',
-  password: '5d4ed41fd046618025585009e903c38461e336c2412ccde5bc2f25cff9b4c2bd',
+  user: 'xgmxjqvssqyssm',
+  host: 'ec2-52-0-114-209.compute-1.amazonaws.com',
+  database: 'dfq7upgaj6k5qk',
+  password: 'd6871c8cd148e7b8375529a0b26242fcaeb974cfc7393b4faee6d6be65568092',
   port: 5432,
   ssl: { rejectUnauthorized: false }
 }
