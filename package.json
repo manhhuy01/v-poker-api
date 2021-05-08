@@ -1,0 +1,25 @@
+{
+  "name": "v-poker-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon .",
+    "start": "node .",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.heroku.com/v-poker-api.git"
+  },
+  "author": "manhhuy01",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "http": "^0.0.1-security",
+    "pg": "^8.6.0",
+    "simple-encryptor": "^4.0.0",
+    "socket.io": "^4.0.2"
+  }
+}
