@@ -1,5 +1,6 @@
 const { Client } = require('pg')
-const encryptor = require('simple-encryptor')('manhhuy-v-poker-keyS');
+const Cryptr = require('cryptr');
+const cryptr = new Cryptr('manhhuy-v-poker-keys');
 
 const dbConfig = {
   user: 'xgmxjqvssqyssm',
@@ -14,16 +15,17 @@ const createUser = async ({ userName, password }) => {
   const client = new Client(dbConfig)
   await client.connect();
   let error = null;
+  let token;
   try {
-    const token = encryptor.encrypt(`${userName}|${password}`);
+    token = cryptr.encrypt(`${userName}|${password}`);
     const res = await client.query(`Insert into accounts (username, password, token) values ('${userName}', '${password}', '${token}') `);
-
+   
   } catch (err) {
     error = err;
   } finally {
     await client.end();
   }
-  return { error };
+  return { error, token };
 }
 
 const getUser = async ({ userName, password }) => {
@@ -35,7 +37,7 @@ const getUser = async ({ userName, password }) => {
     if (res.rows.length) {
       return { error, data: res.rows[0] }
     } else {
-      return { error: 'user không tồn tại', data: null }
+      return { error: 'user không tồn tại hoặc password không đúng', data: null }
     }
 
   } catch (err) {

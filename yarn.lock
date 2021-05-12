@@ -88,6 +88,14 @@ content-type@~1.0.4:
   resolved "https://npm.vexere.net/content-type/-/content-type-1.0.4.tgz#e138cc75e040c727b1966fe5e5f8c9aee256fe3b"
   integrity sha512-hIP3EEPs8tB9AT1L+NUqtwOAps4mk2Zob89MWXMHjHWg9milF/j4osnnQLXBCBFBk/tvIG/tUc9mOUJiPBhPXA==
 
+cookie-parser@^1.4.5:
+  version "1.4.5"
+  resolved "https://npm.vexere.net/cookie-parser/-/cookie-parser-1.4.5.tgz#3e572d4b7c0c80f9c61daf604e4336831b5d1d49"
+  integrity sha512-f13bPUj/gG/5mDr+xLmSxxDsB9DQiTIfhJS/sqjrmfAWiAN+x2O4i/XguTL9yDZ+/IFDanJ+5x7hC4CXT9Tdzw==
+  dependencies:
+    cookie "0.4.0"
+    cookie-signature "1.0.6"
+
 cookie-signature@1.0.6:
   version "1.0.6"
   resolved "https://npm.vexere.net/cookie-signature/-/cookie-signature-1.0.6.tgz#e303a882b342cc3ee8ca513a79999734dab3ae2c"
@@ -110,6 +118,11 @@ cors@^2.8.5, cors@~2.8.5:
   dependencies:
     object-assign "^4"
     vary "^1"
+
+cryptr@^6.0.2:
+  version "6.0.2"
+  resolved "https://npm.vexere.net/cryptr/-/cryptr-6.0.2.tgz#3f9e97f825ffb93f425eb24068efbb6a652bf947"
+  integrity sha512-1TRHI4bmuLIB8WgkH9eeYXzhEg1T4tonO4vVaMBKKde8Dre51J68nAgTVXTwMYXAf7+mV2gBCkm/9wksjSb2sA==
 
 debug@2.6.9:
   version "2.6.9"
@@ -487,11 +500,6 @@ safe-buffer@~5.2.0:
   resolved "https://npm.vexere.net/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
 
-scmp@2.0.0:
-  version "2.0.0"
-  resolved "https://npm.vexere.net/scmp/-/scmp-2.0.0.tgz#247110ef22ccf897b13a3f0abddb52782393cd6a"
-  integrity sha1-JHEQ7yLM+JexOj8KvdtSeCOTzWo=
-
 send@0.17.1:
   version "0.17.1"
   resolved "https://npm.vexere.net/send/-/send-0.17.1.tgz#c1d8b059f7900f7466dd4938bdc44e11ddb376c8"
@@ -525,13 +533,6 @@ setprototypeof@1.1.1:
   version "1.1.1"
   resolved "https://npm.vexere.net/setprototypeof/-/setprototypeof-1.1.1.tgz#7e95acb24aa92f5885e0abef5ba131330d4ae683"
   integrity sha512-JvdAWfbXeIGaZ9cILp38HntZSFSo3mWg6xGcJJsd+d4aRMOqauag1C63dJfDw7OaMYwEbHMOxEZ1lqVRYP2OAw==
-
-simple-encryptor@^4.0.0:
-  version "4.0.0"
-  resolved "https://npm.vexere.net/simple-encryptor/-/simple-encryptor-4.0.0.tgz#aac74b12c365879115ed683c05e17c235a457cc8"
-  integrity sha512-J3oCeJDjRf/X6ZQkpowMKutEDxkjDESRIbdov+PiPwmatepkGZQaF2WHTr7V1cUQnd843E4dQq4zlwruGKGM7w==
-  dependencies:
-    scmp "2.0.0"
 
 socket.io-adapter@~2.2.0:
   version "2.2.0"

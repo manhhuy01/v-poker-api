@@ -15,11 +15,12 @@
   "author": "manhhuy01",
   "license": "ISC",
   "dependencies": {
+    "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
+    "cryptr": "^6.0.2",
     "express": "^4.17.1",
     "http": "^0.0.1-security",
     "pg": "^8.6.0",
-    "simple-encryptor": "^4.0.0",
     "socket.io": "^4.0.2"
   }
 }
