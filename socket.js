@@ -1,3 +1,5 @@
+const Cryptr = require('cryptr');
+const cryptr = new Cryptr('manhhuy-v-poker-keys');
 const game = require('./game')
 
 let io
@@ -13,22 +15,28 @@ const init = (http) => {
   });
 
   io.on("connection", (socket) => {
-    const userName = socket.handshake.query.userName;
-    if(!userName){
-      console.log('io on connection !userName')
-      return;
+    try {
+      const token = socket.handshake.query.token;
+      const userName = (cryptr.decrypt(token) || '').split('|')[0]
+      if(!userName){
+        console.log('io on connection !userName')
+        return;
+      }
+  
+      socket.join(defaultRoom)
+      socket.join(userName);
+      game.addPlayer({ userName })
+      const roomInfo = game.getRoomInfo();
+  
+      io.to(defaultRoom).emit('data', roomInfo)
+    
+      socket.on('disconnect', () => {
+        // socket.rooms.size === 0
+      });
+    } catch (err){
+      console.log('io connection err', err)
     }
 
-    socket.join(defaultRoom)
-    socket.join(userName);
-    game.addPlayer({ userName: socket.handshake.query.userName })
-    const roomInfo = game.getRoomInfo();
-
-    io.to(defaultRoom).emit('data', roomInfo)
-  
-    socket.on('disconnect', () => {
-      // socket.rooms.size === 0
-    });
   });
 }
 
