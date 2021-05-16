@@ -10,7 +10,7 @@ const login = async (req, res) => {
   }
   let { error, data } = await db.getUser({ userName, password });
   if (error) {
-    res.status(400);
+    res.status(404);
     res.send({ error })
   } else {
     res.send({ token: data.token })
@@ -45,7 +45,8 @@ const decryptToken = async (req, res, next) => {
   if (!token) {
     token = req.query.token;
   }
-  if (!token) next();
+  if (!token) return next()
+  
   try {
     let userStr = cryptr.decrypt(token);
     if(!userStr) next();

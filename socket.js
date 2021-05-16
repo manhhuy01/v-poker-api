@@ -26,7 +26,7 @@ const init = (http) => {
       socket.join(defaultRoom)
       socket.join(userName);
       game.addPlayer({ userName })
-      const roomInfo = game.getRoomInfo();
+      const roomInfo = game.getRoomInfo(userName);
   
       io.to(defaultRoom).emit('data', roomInfo)
     
@@ -40,7 +40,22 @@ const init = (http) => {
   });
 }
 
+const updateGame = (userName) => {
+  let data = game.getRoomInfo(userName)
+  io.to(userName).emit('data', data);
+}
+
+const updateAllPlayer = () => {
+  let players = game.getAllPlayers();
+  players.forEach((player)=> {
+    let data = game.getRoomInfo(player.userName)
+    io.to(player.userName).emit('data', data);
+  })
+}
+
 module.exports = {
   io,
   init,
+  updateGame,
+  updateAllPlayer,
 }
