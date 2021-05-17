@@ -41,9 +41,13 @@ const register = async (req, res) => {
 
 const decryptToken = async (req, res, next) => {
   // validate
-  let { token } = req.cookies;
+  let token;
+  // token = req.cookies.token;
   if (!token) {
     token = req.query.token;
+  }
+  if(!token){
+    token = req.headers.token
   }
   if (!token) return next()
   
