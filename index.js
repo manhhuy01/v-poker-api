@@ -26,7 +26,7 @@ var corsOptions = {
 app.use(cookieParser())
 app.use(express.json());
 app.use(cors(corsOptions));
-app.options('*',cors(corsOptions))
+app.options('*', cors(corsOptions))
 
 const socket = require('./socket');
 const http = require('http').createServer(app);
@@ -71,7 +71,7 @@ app.post('/game/joinTable', auth.decryptToken, game.authDealer, (req, res) => {
   let rs = game.joinTable(req.body)
   socket.updateAllPlayer();
 
-  if(rs.error) res.status(400)
+  if (rs.error) res.status(400)
   return res.send({ error: rs.error })
 })
 
@@ -84,7 +84,7 @@ app.post('/game/removeFromTable', auth.decryptToken, game.authDealer, (req, res)
   }
   let rs = game.removeFromTable(req.body)
   socket.updateAllPlayer();
-  if(rs.error) res.status(400)
+  if (rs.error) res.status(400)
   return res.send({ error: rs.error })
 })
 
@@ -97,7 +97,7 @@ app.post('/game/transferDealerRole', auth.decryptToken, game.authDealer, (req, r
   }
   let rs = game.transferDealerRole(req.body)
   socket.updateAllPlayer();
-  if(rs.error) res.status(400)
+  if (rs.error) res.status(400)
   return res.send({ error: rs.error })
 })
 
@@ -110,11 +110,60 @@ app.post('/game/setDealerPosition', auth.decryptToken, game.authDealer, (req, re
   }
   let rs = game.setDealerPosition(req.body)
   socket.updateAllPlayer();
-  if(rs.error) res.status(400)
+  if (rs.error) res.status(400)
   return res.send({ error: rs.error })
 })
 
+app.post('/game/start', auth.decryptToken, game.authDealer, (req, res) => {
+  if (!req?.user?.isDealer) {
+    return res.sendStatus(401);
+  }
+  let rs = game.startGame()
+  socket.updateAllPlayer();
+  if (rs.error) res.status(400)
+  return res.send({ error: rs.error })
+})
 
+app.post('/game/shuffleCards', auth.decryptToken, game.authDealer, (req, res) => {
+  if (!req?.user?.isDealer) {
+    return res.sendStatus(401);
+  }
+  let rs = game.shuffleCards()
+  // tạm thời xào bài chưa cần thông báo chơi players
+  // socket.updateAllPlayer();
+  if (rs.error) res.status(400)
+  return res.send({ error: rs.error })
+})
+
+app.post('/game/preFlop', auth.decryptToken, game.authDealer, (req, res) => {
+  if (!req?.user?.isDealer) {
+    return res.sendStatus(401);
+  }
+  let rs = game.preFlop()
+  socket.updateAllPlayer();
+  if (rs.error) res.status(400)
+  return res.send({ error: rs.error })
+})
+
+app.post('/game/flop', auth.decryptToken, game.authDealer, (req, res) => {
+  if (!req?.user?.isDealer) {
+    return res.sendStatus(401);
+  }
+  let rs = game.flop()
+  socket.updateAllPlayer();
+  if (rs.error) res.status(400)
+  return res.send({ error: rs.error })
+})
+
+app.post('/player/action', auth.decryptToken, (req, res) => {
+  if (!req?.user) {
+    return res.sendStatus(401);
+  }
+  let rs = game.playerAction({ ...req.body, userName: req.user.userName })
+  socket.updateAllPlayer();
+  if (rs.error) res.status(400)
+  return res.send({ error: rs.error })
+})
 
 
 http.listen(PORT, () => console.log(`Listening on ${PORT}`));
