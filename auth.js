@@ -13,7 +13,10 @@ const login = async (req, res) => {
     res.status(404);
     res.send({ error })
   } else {
-    res.send({ token: data.token })
+    res.send({ 
+      token: data.token,
+      
+    })
   }
 }
 
@@ -24,6 +27,7 @@ const register = async (req, res) => {
     res.status(400)
     res.send('err')
   }
+  
   let result = await db.createUser({ userName, password });
   if (result.error) {
     res.status(400)
@@ -55,7 +59,7 @@ const decryptToken = async (req, res, next) => {
     let userStr = cryptr.decrypt(token);
     if(!userStr) next();
     req.user = {
-      userName: userStr.split('|')[0]
+      userName: userStr,
     }
     next()
   } catch(err){

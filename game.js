@@ -1,5 +1,5 @@
 const utils = require('./utils')
-
+const db = require('./db')
 let data = {
   setting: {
     smallBlind: 1,
@@ -74,37 +74,35 @@ const setDealer = () => {
   data.dealer = data.players[0].userName;
 }
 
-const addPlayer = ({ userName }) => {
-  // let userStr = cryptr.decrypt(token);
+const addPlayer = ({ userName, balance }) => {
   if (!userName) {
     console.log('game.addPlayer: userName error')
     return;
   }
-  // const userName = userStr.split('|')[0]
   if (!data.players.map(x => x.userName).includes(userName)) {
     data.players.push({
       userName,
-      accBalance: 0,
+      accBalance: balance || 0,
     });
-    // const emptyPosition = Object.keys(data.position).filter(p => !data.position[p].user)
-    // data.position[emptyPosition[0]] = {
-    //   ...POSITION,
-    //   user: {
-    //     userName,
-    //     accBalance: 0,
-    //   }
-    // }
   }
   setDealer();
 }
 
-const getRoomInfo = () => {
-  let newData = { ...data };
+const getRoomInfo = (userName) => {
+  let newData = JSON.parse(JSON.stringify(data));
+  delete newData.cards
   Object.keys(data.position).forEach((pos) => {
     if (newData.position[pos].user) {
       let player = data.players.find(x => x.userName === newData.position[pos].user.userName);
       if (player) {
         newData.position[pos].user.accBalance = player.accBalance
+      }
+
+      if (newData.position[pos].user.userName !== userName && !newData.table.isShowDown) {
+        newData.position[pos] = {
+          ...newData.position[pos],
+          cards: newData.position[pos].cards.length ? ['u', 'u'] : [],
+        }
       }
     }
   })
@@ -116,13 +114,13 @@ const updateSetting = ({ smallBlind }) => {
   // data.setting.dealerAlsoPlayer = !!dealerAlsoPlayer
 }
 
-const updateProfile = ({ userName, accBalance }) => {
+const updateProfile = async ({ userName, accBalance }) => {
   let player = data.players.find(x => x.userName === userName)
   if (!player) {
     console.log('update profile err no player')
   }
   player.accBalance = accBalance;
-
+  await db.updateBalance({ balance: accBalance, userName });
 }
 
 const getAllPlayers = () => data.players;
@@ -580,8 +578,8 @@ const playerBet = ({ position, betBalance }) => {
 }
 
 const playerCall = ({ position }) => {
-  if(!data.table.preFlop){
-    return { error: 'Action call không hợp lệ'}
+  if (!data.table.preFlop) {
+    return { error: 'Action call không hợp lệ' }
   }
   if (data.table.currentBet == 0) {
     return { error: 'Action call không được chấp nhận khi không có ai bet' }
