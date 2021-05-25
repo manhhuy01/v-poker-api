@@ -46,7 +46,7 @@ const findPairs = ({ analyticCards }) => {
       cards: [
         ...pairCard,
         ...otherPairs.cards.slice(0, 2),
-        analyticCards.filter(c => c.num !== pairCard[0].num || c.num !== otherPairs.cards[0].num)[0],
+        analyticCards.filter(c => c.num !== pairCard[0].num && c.num !== otherPairs.cards[0].num)[0],
       ]
     }
   }
@@ -75,7 +75,7 @@ const findTreeOfKind = ({ analyticCards }) => {
 const findFullHouse = ({ analyticCards }) => {
   let threeOfKind = findTreeOfKind({ analyticCards })
   if (!threeOfKind) return false;
-  let pairs = findPairs({ analyticCards: analyticCards.filter(c => c.num !== threeOfKind.totk[0].num) })
+  let pairs = findPairs({ analyticCards: analyticCards.filter(c => c.num !== threeOfKind.cards[0].num) })
   if (!pairs) return false;
   return {
     name: 'fullHouse',

@@ -165,5 +165,15 @@ app.post('/player/action', auth.decryptToken, (req, res) => {
   return res.send({ error: rs.error })
 })
 
+app.post('/game/reset', auth.decryptToken, game.authDealer, (req, res) => {
+  if (!req?.user?.isDealer) {
+    return res.sendStatus(401);
+  }
+  let rs = game.reset()
+  socket.updateAllPlayer();
+  if (rs.error) res.status(400)
+  return res.send({ error: rs.error })
+})
+
 
 http.listen(PORT, () => console.log(`Listening on ${PORT}`));
