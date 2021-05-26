@@ -175,8 +175,8 @@ const findNextPosition = ({ position }) => {
       foundPosition = curPosition;
     }
     if (
-      data.position[curPosition].isPlaying &&
-      data.position[curPosition].user && data.position[curPosition].user.accBalance > 0
+      data.position[curPosition].isPlaying
+      // && data.position[curPosition].user && data.position[curPosition].user.accBalance > 0
     ) {
       foundPosition = curPosition;
     }
@@ -501,33 +501,35 @@ const river = () => {
 
 const finish = ({ isShowDown = true }) => {
 
-  if (!data.table.start) {
+  if (!data.table.start && isShowDown) {
     return { error: 'Ván chưa bắt đầu' }
   }
 
-  if (!data.table.preFlop) {
+  if (!data.table.preFlop && isShowDown) {
     return { error: 'chưa chia pre flop' }
   }
 
-  if (!data.table.flop) {
+  if (!data.table.flop && isShowDown) {
     return { error: 'chưa chia flop' }
   }
 
-  if (!data.table.turn) {
+  if (!data.table.turn && isShowDown) {
     return { error: 'chưa chia turn' }
   }
 
-  if (!data.table.river) {
+  if (!data.table.river && isShowDown) {
     return { error: 'chưa chia river' }
   }
 
   // so bài chia tiền
+  if (isShowDown) {
+    Object.keys(data.position).forEach(p => {
+      if (data.position[p].cards?.length) {
+        data.position[p].resultCard = utils.getHighestCards([...data.table.flop, data.table.turn, data.table.river, ...data.position[p].cards]);
+      }
+    })
+  }
 
-  Object.keys(data.position).forEach(p => {
-    if (data.position[p].cards?.length) {
-      data.position[p].resultCard = utils.getHighestCards([...data.table.flop, ...data.position[p].cards]);
-    }
-  })
 
   data.table.pot.forEach(pot => {
     let positions = Object.keys(data.position).filter(p => pot.users.includes(data.position[p].user?.userName) && data.position[p].isPlaying && !data.position[p].isFold);
@@ -537,7 +539,7 @@ const finish = ({ isShowDown = true }) => {
         if (p !== bestHands[0]) {
           let compare = utils.compare({
             handA: [...data.table.flop, data.table.turn, data.table.river, ...data.position[p].cards],
-            handB: [...data.table.flop, data.table.turn, data.table.river, ...data.position[bestHands[0]].cards]
+            handB: [...data.table.flop, data.table.turn, data.table.river, ...data.position[bestHands[0]].cards],
           })
           if (compare > 0) {
             bestHands = [p]
@@ -547,7 +549,7 @@ const finish = ({ isShowDown = true }) => {
         }
       })
     }
-    let winBalance = pot.balance / bestHands.length;
+    let winBalance = Math.floor(pot.balance / bestHands.length);
     bestHands.forEach(p => {
       data.position[p].winBalance += winBalance;
     })
@@ -566,29 +568,7 @@ const finish = ({ isShowDown = true }) => {
   return {}
 }
 
-const processNextStepGame = () => {
-  const positionThinking = Object.keys(data.position).find(p => data.position[p].isThinking);
-  if (!positionThinking && !data.table.isShowDown) {
-    return { error: 'Không tìm thấy vị trí đang action' }
-  }
-  if (!data.table.isShowDown) {
-    data.position[positionThinking].isThinking = false;
-    let nextPosition = positionThinking;
-    let count = 0;
-    let isOverFirstAction = false;
-    do {
-      count++;
-      nextPosition = findNextPosition({ position: nextPosition });
-      if (data.table.firstActionPlayer == nextPosition) {
-        isOverFirstAction = true;
-      }
-    } while (data.position[nextPosition].isFold && !isOverFirstAction)
-    if(!isOverFirstAction){
-      data.position[nextPosition].isThinking = true;
-      return {}
-    }
-  }
-
+const collectTablePot = () => {
   // gom tiền trước vòng tiếp theo 
 
   data.table.currentBet = 0;
@@ -609,7 +589,7 @@ const processNextStepGame = () => {
       }
       let pot = data.table.pot[data.table.pot.length - 1];
       betPositions.forEach(s => {
-        if (!data.position[s].isFold) {
+        if (!data.position[s].isFold && !pot.users.includes(data.position[s].user.userName)) {
           pot.users.push(data.position[s].user.userName);
         }
         pot.balance += minBetBalance;
@@ -622,6 +602,37 @@ const processNextStepGame = () => {
     } while (betPositions.length)
   }
 
+}
+
+const processNextStepGame = () => {
+
+  const positionThinking = Object.keys(data.position).find(p => data.position[p].isThinking);
+  if (!positionThinking && !data.table.isShowDown) {
+    return { error: 'Không tìm thấy vị trí đang action' }
+  }
+  if (!data.table.isShowDown) {
+    data.position[positionThinking].isThinking = false;
+    if (isOnePlayer()) {
+      collectTablePot();
+      return finish({ isShowDown: false });
+    }
+    let nextPosition = positionThinking;
+    let count = 0;
+    let isOverFirstAction = false;
+    do {
+      count++;
+      nextPosition = findNextPosition({ position: nextPosition });
+      if (data.table.firstActionPlayer == nextPosition) {
+        isOverFirstAction = true;
+      }
+    } while (data.position[nextPosition].isFold && !isOverFirstAction && nextPosition != positionThinking && data.position[nextPosition].user.accBalance == 0)
+    if (!isOverFirstAction && nextPosition != positionThinking) {
+      data.position[nextPosition].isThinking = true;
+      return {}
+    }
+  }
+
+  collectTablePot();
 
   if (data.table.preFlop && !data.table.flop) {
     return flop();
@@ -636,18 +647,18 @@ const processNextStepGame = () => {
   return finish({ isShowDown: true });
 }
 
-const playerBet = ({ position, betBalance }) => {
+const playerBet = ({ position, betBalance, isAllIn = false }) => {
   betBalance = +betBalance;
   if (betBalance == 'NaN') {
     return { error: 'Số tiền bet phải là số' }
   }
-  if (betBalance <= data.table.currentBet) {
+  if (!isAllIn && betBalance < data.table.currentBet) {
     return { error: `Số tiền bet phải lớn hơn ${data.table.currentBet}`, }
   }
-  if (betBalance < data.setting.smallBlind * 2) {
+  if (!isAllIn && betBalance < data.setting.smallBlind * 2) {
     return { error: `Số tiền bet phải lớn hơn big blind ${data.setting.smallBlind}`, }
   }
-  if (betBalance % data.setting.smallBlind != 0) {
+  if (!isAllIn && betBalance % data.setting.smallBlind != 0) {
     return { error: `Số tiền bet phải là bội số của ${data.setting.smallBlind}` }
   }
 
@@ -708,7 +719,7 @@ const playerFold = ({ position }) => {
   return processNextStepGame();
 }
 
-const playerAction = ({ userName, type, betBalance = 0 }) => {
+const playerAction = ({ userName, type, betBalance = 0, isAllIn = false }) => {
 
   if (!data.table.start) {
     return { error: 'ván chưa bắt đầu' }
@@ -738,7 +749,7 @@ const playerAction = ({ userName, type, betBalance = 0 }) => {
 
   switch (type) {
     case 'BET':
-      return playerBet({ position, betBalance })
+      return playerBet({ position, betBalance, isAllIn })
     case 'CHECK':
       return playerCheck({ position })
     case 'CALL':
@@ -799,9 +810,9 @@ const reset = async () => {
     currentBet: 0,
     isShowDown: false,
   }
-  let dealerPosition = Object.keys(data.position).find(p => data.position[p].namePos = 'D');
-  if(dealerPosition){
-    const nextDealerPosition = findNextPosition({position: dealerPosition});
+  let dealerPosition = Object.keys(data.position).find(p => data.position[p].namePos == 'D');
+  if (dealerPosition) {
+    const nextDealerPosition = findNextPosition({ position: dealerPosition });
     data.position[dealerPosition].namePos = ''
     data.position[nextDealerPosition].namePos = 'D'
   }

@@ -156,4 +156,65 @@ describe('playerBet', () => {
     expect(newData.position[1].isThinking).toBe(true);
 
   })
+
+  test('bet-all-in 2', ()=> {
+
+    const data = {
+      setting: {
+        smallBlind: 1,
+      },
+      players,
+      position: {
+        1: {
+          user: {
+            userName: 'a',
+            accBalance: 58,
+          },
+          betBalance: 0,
+          isFold: false,
+          namePos: 'D',
+          cards: ['8s', '9c'],
+          isThinking: false,
+          isPlaying: true,
+        },
+        2: {},
+        3: {
+          user: {
+            userName: 'c',
+            accBalance: 87,
+          },
+          betBalance: 0,
+          isFold: false,
+          namePos: '',
+          cards: ['6h', '5d'],
+          isThinking: true,
+          isPlaying: true,
+        },
+        4: {},
+        5: {},
+        6: {},
+        7: {},
+        8: {},
+        9: {},
+      },
+      table: {
+        start: true,
+        preFlop: true,
+        flop: '',
+        turn: '',
+        river: '',
+        finish: false,
+        firstActionPlayer: 2,
+        pot: 0,
+        currentBet: 0,
+      },
+      cards,
+    }
+
+    game.setData(data);
+    let rs = game.playerAction({ type: 'BET', userName: 'c', betBalance: 87, isAllIn: true });
+    let newData = game.getData();
+    expect(newData.position[3].user.accBalance).toBe(0);
+
+  })
 })

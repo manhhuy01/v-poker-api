@@ -246,17 +246,19 @@ const compare = ({ handA = [], handB = [] }) => {
   const highestHandA = getHighestCards(handA);
   const highestHandB = getHighestCards(handB);
 
-  if (highestHandA.value - highestHandB > 0) return 1;
-  if (highestHandA.value - highestHandB < 0) return -1;
+  if (highestHandA.value - highestHandB.value > 0) return 1;
+  if (highestHandA.value - highestHandB.value < 0) return -1;
   let rs = 0;
   [0, 1, 2, 3, 4].forEach(i => {
-    if (highestHandA.cards[i].value - highestHandB.cards[i].value > 0) {
-      rs = 1;
-      return;
-    };
-    if (highestHandA.cards[i].value - highestHandB.cards[i].value < 0) {
-      rs = -1;
-      return;
+    if(rs == 0) {
+      if (highestHandA.cards[i].value - highestHandB.cards[i].value > 0) {
+        rs = 1;
+        return;
+      };
+      if (highestHandA.cards[i].value - highestHandB.cards[i].value < 0) {
+        rs = -1;
+        return;
+      }
     }
   })
 

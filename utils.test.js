@@ -87,6 +87,14 @@ describe('test so card', () => {
     expect(rs.cards[2].num).toBe('J');
     expect(rs.cards[4].num).toBe('3');
   })
+  test('pair 4', () => {
+    let rs = utils.getHighestCards(['4c', '5d', '9c', '9h', '4s', '3s', '5d'])
+    expect(rs.name).toBe('twoPair');
+    expect(rs.value).toBe(3);
+    expect(rs.cards[0].num).toBe('9');
+    expect(rs.cards[2].num).toBe('5');
+    expect(rs.cards[4].num).toBe('4');
+  })
   test('three 1', () => {
     let rs = utils.getHighestCards(['3d', '3c', '2s', '3h', '2c', '2d', '10s'])
     expect(rs.name).toBe('totk');
