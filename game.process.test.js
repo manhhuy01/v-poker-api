@@ -386,7 +386,7 @@ describe('game process', () => {
         firstActionPlayer: 1,
         pot: [
           {
-            users: ['a', 'b', ],
+            users: ['a', 'b',],
             balance: 24,
           },
         ],
@@ -407,7 +407,7 @@ describe('game process', () => {
 
 
   test('process fold 1', () => {
-    
+
     const data = {
       setting: {
         smallBlind: 1,
@@ -476,7 +476,7 @@ describe('game process', () => {
         ],
         currentBet: 12,
       },
-      cards : [
+      cards: [
         '2s', '3s', '4s', '5s', '6s', '7s', '8s', '9s', '10s', 'Js', 'Qs', 'Ks', 'As',
         '2h', '3h', '4h', '5h', '6h', '7h', '8h', '9h', '10h', 'Jh', 'Qh', 'Kh', 'Ah',
         '2d', '3d', '4d', '5d', '6d', '7d', '8d', '9d', '10d', 'Jd', 'Qd', 'Kd', 'Ad',
@@ -507,7 +507,7 @@ describe('game process', () => {
   })
 
   test('process fold 2', () => {
-    
+
     const data = {
       setting: {
         smallBlind: 1,
@@ -576,7 +576,7 @@ describe('game process', () => {
         ],
         currentBet: 2,
       },
-      cards : [
+      cards: [
         '2s', '3s', '4s', '5s', '6s', '7s', '8s', '9s', '10s', 'Js', 'Qs', 'Ks', 'As',
         '2h', '3h', '4h', '5h', '6h', '7h', '8h', '9h', '10h', 'Jh', 'Qh', 'Kh', 'Ah',
         '2d', '3d', '4d', '5d', '6d', '7d', '8d', '9d', '10d', 'Jd', 'Qd', 'Kd', 'Ad',
@@ -595,9 +595,9 @@ describe('game process', () => {
 
     expect(newData.table.pot.length).toBe(1);
   })
-  
+
   test('process fold 3', () => {
-    
+
     const data = {
       setting: {
         smallBlind: 1,
@@ -655,7 +655,7 @@ describe('game process', () => {
         currentBet: 2,
         isShowDown: false,
       },
-      cards : [
+      cards: [
         '2s', '3s', '4s', '5s', '6s', '7s', '8s', '9s', '10s', 'Js', 'Qs', 'Ks', 'As',
         '2h', '3h', '4h', '5h', '6h', '7h', '8h', '9h', '10h', 'Jh', 'Qh', 'Kh', 'Ah',
         '2d', '3d', '4d', '5d', '6d', '7d', '8d', '9d', '10d', 'Jd', 'Qd', 'Kd', 'Ad',
@@ -675,7 +675,7 @@ describe('game process', () => {
   })
 
   test('process check 1', () => {
-    
+
     const data = {
       setting: {
         smallBlind: 1,
@@ -733,7 +733,7 @@ describe('game process', () => {
         currentBet: 0,
         isShowDown: false,
       },
-      cards : [
+      cards: [
         '2s', '3s', '4s', '5s', '6s', '7s', '8s', '9s', '10s', 'Js', 'Qs', 'Ks', 'As',
         '2h', '3h', '4h', '5h', '6h', '7h', '8h', '9h', '10h', 'Jh', 'Qh', 'Kh', 'Ah',
         '2d', '3d', '4d', '5d', '6d', '7d', '8d', '9d', '10d', 'Jd', 'Qd', 'Kd', 'Ad',
@@ -755,4 +755,277 @@ describe('game process', () => {
     expect(newData.table.isShowDown).toBe(true);
   })
 
+
+  test('process normal-full', () => {
+
+    const data = {
+      setting: {
+        smallBlind: 1,
+      },
+      players: [
+        {
+          userName: '1',
+          accBalance: 500
+        },
+        {
+          userName: '2',
+          accBalance: 200
+        },
+        {
+          userName: '3',
+          accBalance: 500
+        },
+        {
+          userName: '4',
+          accBalance: 500
+        },
+        {
+          userName: '5',
+          accBalance: 500
+        },
+        {
+          userName: '6',
+          accBalance: 500
+        },
+        {
+          userName: '7',
+          accBalance: 500
+        },
+        {
+          userName: '8',
+          accBalance: 500
+        },
+        {
+          userName: '9',
+          accBalance: 500
+        }
+      ],
+      position: {
+        1: {
+          user: {
+            userName: '1',
+            accBalance: 500,
+          },
+          betBalance: 0,
+          isFold: false,
+          namePos: '',
+          cards: [],
+          isThinking: false,
+          isPlaying: true,
+        },
+        2: {
+          user: {
+            userName: '2',
+            accBalance: 200,
+          },
+          betBalance: 0,
+          isFold: false,
+          namePos: '',
+          cards: [],
+          isThinking: false,
+          isPlaying: true,
+        },
+        3: {
+          user: {
+            userName: '3',
+            accBalance: 500,
+          },
+          betBalance: 0,
+          isFold: false,
+          namePos: '',
+          cards: [],
+          isThinking: false,
+          isPlaying: true,
+        },
+        4: {
+          user: {
+            userName: '4',
+            accBalance: 500,
+          },
+          betBalance: 0,
+          isFold: false,
+          namePos: '',
+          cards: [],
+          isThinking: false,
+          isPlaying: true,
+        },
+        5: {
+          user: {
+            userName: '5',
+            accBalance: 500,
+          },
+          betBalance: 0,
+          isFold: false,
+          namePos: '',
+          cards: [],
+          isThinking: false,
+          isPlaying: true,
+        },
+        6: {
+          user: {
+            userName: '6',
+            accBalance: 500,
+          },
+          betBalance: 0,
+          isFold: false,
+          namePos: '',
+          cards: [],
+          isThinking: false,
+          isPlaying: true,
+        },
+        7: {
+          user: {
+            userName: '7',
+            accBalance: 500,
+          },
+          betBalance: 0,
+          isFold: false,
+          namePos: '',
+          cards: [],
+          isThinking: false,
+          isPlaying: true,
+        },
+        8: {
+          user: {
+            userName: '8',
+            accBalance: 500,
+          },
+          betBalance: 0,
+          isFold: false,
+          namePos: '',
+          cards: [],
+          isThinking: false,
+          isPlaying: true,
+        },
+        9: {
+          user: {
+            userName: '9',
+            accBalance: 500,
+          },
+          betBalance: 0,
+          isFold: false,
+          namePos: '',
+          cards: [],
+          isThinking: false,
+          isPlaying: true,
+        },
+      },
+      table: {
+        start: false,
+        preFlop: '',
+        flop: '',
+        turn: '',
+        river: '',
+        finish: false,
+        firstActionPlayer: undefined,
+        pot: [
+          {
+            users: [],
+            balance: 0,
+          }
+        ],
+        currentBet: 0,
+      },
+      cards: [
+        '2s', '3s', '4s', '5s', '6s', '7s', '8s', '9s', '10s', 'Js', 'Qs', 'Ks', 'As',
+        '2h', '3h', '4h', '5h', '6h', '7h', '8h', '9h', '10h', 'Jh', 'Qh', 'Kh', 'Ah',
+        '2d', '3d', '4d', '5d', '6d', '7d', '8d', '9d', '10d', 'Jd', 'Qd', 'Kd', 'Ad',
+        '2c', '3c', '4c', '5c', '6c', '7c', '8c', '9c', '10c', 'Jc', 'Qc', 'Kc', 'Ac',
+      ],
+    }
+    let newData;
+    game.setData(data);
+    game.setDealerPosition({ userName: '1' })
+    game.startGame();
+    game.playerAction({ type: 'BET', userName: '4', betBalance: 4 });
+    game.preFlop();
+    newData = game.getData();
+    expect(newData.position[5].isThinking).toBe(true)
+    game.playerAction({ type: 'CALL', userName: '5' });
+    game.playerAction({ type: 'FOLD', userName: '6', });
+    game.playerAction({ type: 'CALL', userName: '7', });
+    game.playerAction({ type: 'CALL', userName: '8', });
+    game.playerAction({ type: 'CALL', userName: '9', });
+    game.playerAction({ type: 'CALL', userName: '1', });
+    game.playerAction({ type: 'CALL', userName: '2', });
+    game.playerAction({ type: 'CALL', userName: '3', });
+    game.playerAction({ type: 'CHECK', userName: '4', });
+    newData = game.getData();
+    // flop
+    expect(newData.position[2].isThinking).toBe(true)
+
+    game.playerAction({ type: 'CHECK', userName: '2', });
+    game.playerAction({ type: 'CHECK', userName: '3', });
+    game.playerAction({ type: 'CHECK', userName: '4', });
+    game.playerAction({ type: 'CHECK', userName: '5', });
+
+    newData = game.getData();
+    expect(newData.position[6].isThinking).toBe(false)
+    expect(newData.position[7].isThinking).toBe(true)
+
+    game.playerAction({ type: 'BET', userName: '7', betBalance: 10 });
+    game.playerAction({ type: 'CALL', userName: '8', });
+    game.playerAction({ type: 'CALL', userName: '9', });
+    game.playerAction({ type: 'FOLD', userName: '1', });
+    game.playerAction({ type: 'CALL', userName: '2', });
+    game.playerAction({ type: 'CALL', userName: '3', });
+    game.playerAction({ type: 'CALL', userName: '4', });
+    game.playerAction({ type: 'BET', userName: '5', betBalance: 20 });
+
+    newData = game.getData();
+    expect(newData.position[7].isThinking).toBe(true)
+    game.playerAction({ type: 'CALL', userName: '7', });
+    game.playerAction({ type: 'FOLD', userName: '8', });
+    game.playerAction({ type: 'CALL', userName: '9', });
+
+    newData = game.getData();
+    expect(newData.position[2].isThinking).toBe(true)
+    expect(newData.table.firstActionPlayer).toBe(5)
+
+    game.playerAction({ type: 'CALL', userName: '2', });
+    game.playerAction({ type: 'FOLD', userName: '3', });
+    game.playerAction({ type: 'FOLD', userName: '4', });
+    // turn
+    newData = game.getData();
+    expect(newData.table.firstActionPlayer).toBe(2)
+    game.playerAction({ type: 'CHECK', userName: '2', });
+
+    newData = game.getData();
+    expect(newData.position[5].isThinking).toBe(true)
+    game.playerAction({ type: 'CHECK', userName: '5', });
+
+    newData = game.getData();
+    expect(newData.position[7].isThinking).toBe(true)
+    game.playerAction({ type: 'CHECK', userName: '7', });
+
+    newData = game.getData();
+    expect(newData.position[9].isThinking).toBe(true)
+    game.playerAction({ type: 'BET', userName: '9', betBalance: 10 });
+
+    newData = game.getData();
+    expect(newData.position[2].isThinking).toBe(true)
+    expect(newData.table.firstActionPlayer).toBe(9)
+    game.playerAction({ type: 'FOLD', userName: '2' });
+
+    newData = game.getData();
+    expect(newData.position[5].isThinking).toBe(true)
+    game.playerAction({ type: 'CALL', userName: '5' });
+
+    newData = game.getData();
+    expect(newData.position[7].isThinking).toBe(true)
+    game.playerAction({ type: 'BET', userName: '7', isAllIn: true });
+
+    // river
+    newData = game.getData();
+    expect(newData.position[9].isThinking).toBe(true)
+    game.playerAction({ type: 'FOLD', userName: '9' });
+
+    newData = game.getData();
+    expect(newData.position[5].isThinking).toBe(true)
+    game.playerAction({ type: 'CALL', userName: '5' });
+    // show down
+    newData = game.getData();
+    expect(newData.table.finish).toBe(true)
+
+  })
 })

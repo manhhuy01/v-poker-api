@@ -224,6 +224,9 @@ const isShowDown = () => {
 }
 
 const setDealerPosition = ({ userName }) => {
+  if (data.table.start) {
+    return { error: 'Ván đã bắt đầu không set dealer lại được' }
+  }
   let player = data.players.find(x => x.userName === userName)
   if (!player) {
     return { error: 'Không tìm thấy người này' }
@@ -618,15 +621,27 @@ const processNextStepGame = () => {
     }
     let nextPosition = positionThinking;
     let count = 0;
-    let isOverFirstAction = false;
+    let isFindNext = true;
+    let isFound = false
     do {
       count++;
       nextPosition = findNextPosition({ position: nextPosition });
-      if (data.table.firstActionPlayer == nextPosition) {
-        isOverFirstAction = true;
+      if(nextPosition != positionThinking && !data.position[nextPosition].isFold && data.position[nextPosition].user.accBalance != 0){
+        isFindNext = false;
+        isFound = true;
       }
-    } while (data.position[nextPosition].isFold && !isOverFirstAction && nextPosition != positionThinking && data.position[nextPosition].user.accBalance == 0)
-    if (!isOverFirstAction && nextPosition != positionThinking) {
+      // đã chạy đc 1 vòng
+      if (data.table.firstActionPlayer == nextPosition) {
+        isFindNext = false;
+        isFound = false;
+      }
+      // loop forever
+      if(count > 10){
+        isFindNext = false;
+        isFound = false;
+      }
+    } while (isFindNext)
+    if (isFound) {
       data.position[nextPosition].isThinking = true;
       return {}
     }
@@ -648,26 +663,31 @@ const processNextStepGame = () => {
 }
 
 const playerBet = ({ position, betBalance, isAllIn = false }) => {
-  betBalance = +betBalance;
-  if (betBalance == 'NaN') {
-    return { error: 'Số tiền bet phải là số' }
+  if(!isAllIn){
+    betBalance = +betBalance;
+
+    if (betBalance == 'NaN') {
+      return { error: 'Số tiền bet phải là số' }
+    }
+    if (betBalance < data.table.currentBet) {
+      return { error: `Số tiền bet phải lớn hơn ${data.table.currentBet}`, }
+    }
+    if (betBalance < data.setting.smallBlind * 2) {
+      return { error: `Số tiền bet phải lớn hơn big blind ${data.setting.smallBlind}`, }
+    }
+    if (betBalance % data.setting.smallBlind != 0) {
+      return { error: `Số tiền bet phải là bội số của ${data.setting.smallBlind}` }
+    }
+    if (betBalance == 0 && data.table.flop) {
+      return { error: 'Số tiền bet không được bằng 0' }
+    }
   }
-  if (!isAllIn && betBalance < data.table.currentBet) {
-    return { error: `Số tiền bet phải lớn hơn ${data.table.currentBet}`, }
-  }
-  if (!isAllIn && betBalance < data.setting.smallBlind * 2) {
-    return { error: `Số tiền bet phải lớn hơn big blind ${data.setting.smallBlind}`, }
-  }
-  if (!isAllIn && betBalance % data.setting.smallBlind != 0) {
-    return { error: `Số tiền bet phải là bội số của ${data.setting.smallBlind}` }
+  if(isAllIn){
+    betBalance = data.position[position].user.accBalance + data.position[position].betBalance;
   }
 
-  if (betBalance < 0) {
-    return { error: 'Số tiền bet không được nhỏ hơn 0' }
-  }
-
-  if (betBalance == 0 && data.table.flop) {
-    return { error: 'Số tiền bet không được bằng 0' }
+  if (betBalance <= 0) {
+    return { error: 'Số tiền bet không nhỏ hơn hoặc bằng 0' }
   }
 
   if (betBalance > data.position[position].user.accBalance + data.position[position].betBalance) {
@@ -676,7 +696,9 @@ const playerBet = ({ position, betBalance, isAllIn = false }) => {
   data.position[position].user.accBalance = data.position[position].user.accBalance + data.position[position].betBalance - betBalance;
   data.position[position].betBalance = +betBalance;
   if (betBalance > data.table.currentBet) {
-    data.table.firstActionPlayer = +position;
+    if (data.table.preFlop) {
+      data.table.firstActionPlayer = +position;
+    }
     data.table.currentBet = betBalance;
   }
   return processNextStepGame();
@@ -763,12 +785,12 @@ const playerAction = ({ userName, type, betBalance = 0, isAllIn = false }) => {
 }
 
 const reset = async () => {
-  if (!data.table.finish) {
-    return { error: 'Ván chưa kết thúc' }
-  }
-  if (!data.table.start) {
-    return { error: 'Ván chưa bắt đầu' }
-  }
+  // if (!data.table.finish) {
+  //   return { error: 'Ván chưa kết thúc' }
+  // }
+  // if (!data.table.start) {
+  //   return { error: 'Ván chưa bắt đầu' }
+  // }
 
   Object.keys(data.position).forEach(p => {
     if (data.position[p].user) {
