@@ -73,7 +73,9 @@ const setDealer = () => {
     console.log('game.setDealer: không có players')
     return
   }
-  data.dealer = data.players[0].userName;
+  if (!data.dealer) {
+    data.dealer = data.players[0].userName;
+  }
 }
 
 const addPlayer = ({ userName, balance }) => {
@@ -370,13 +372,38 @@ const setNextDealerAction = () => {
   if (!dealerPosition) {
     return { error: 'không tìm thấy dealer' }
   }
-  const nextPosition = findNextPosition({ position: dealerPosition });
-  if (nextPosition == dealerPosition) {
+
+  let nextPosition = dealerPosition;
+  let count = 0;
+  let isFindNext = true;
+  let isFound = false
+  do {
+    count++;
+    nextPosition = findNextPosition({ position: nextPosition });
+    if (nextPosition != dealerPosition && !data.position[nextPosition].isFold && data.position[nextPosition].user.accBalance != 0) {
+      isFindNext = false;
+      isFound = true;
+    }
+    // đã chạy đc 1 vòng
+    if (dealerPosition == nextPosition) {
+      isFindNext = false;
+      isFound = false;
+    }
+    // loop forever
+    if (count > 10) {
+      isFindNext = false;
+      isFound = false;
+    }
+  } while (isFindNext)
+  if(isFound) {
+    data.table.firstActionPlayer = +nextPosition;
+    data.position[nextPosition].isThinking = true;
+    return {}
+  } else {
     return { error: 'Không tìm thấy vị trí action ' }
   }
-  data.table.firstActionPlayer = +nextPosition;
-  data.position[nextPosition].isThinking = true;
-  return {}
+  
+ 
 }
 
 const flop = () => {
@@ -626,7 +653,7 @@ const processNextStepGame = () => {
     do {
       count++;
       nextPosition = findNextPosition({ position: nextPosition });
-      if(nextPosition != positionThinking && !data.position[nextPosition].isFold && data.position[nextPosition].user.accBalance != 0){
+      if (nextPosition != positionThinking && !data.position[nextPosition].isFold && data.position[nextPosition].user.accBalance != 0) {
         isFindNext = false;
         isFound = true;
       }
@@ -636,7 +663,7 @@ const processNextStepGame = () => {
         isFound = false;
       }
       // loop forever
-      if(count > 10){
+      if (count > 10) {
         isFindNext = false;
         isFound = false;
       }
@@ -663,7 +690,7 @@ const processNextStepGame = () => {
 }
 
 const playerBet = ({ position, betBalance, isAllIn = false }) => {
-  if(!isAllIn){
+  if (!isAllIn) {
     betBalance = +betBalance;
 
     if (betBalance == 'NaN') {
@@ -682,7 +709,7 @@ const playerBet = ({ position, betBalance, isAllIn = false }) => {
       return { error: 'Số tiền bet không được bằng 0' }
     }
   }
-  if(isAllIn){
+  if (isAllIn) {
     betBalance = data.position[position].user.accBalance + data.position[position].betBalance;
   }
 
@@ -791,7 +818,12 @@ const reset = async () => {
   // if (!data.table.start) {
   //   return { error: 'Ván chưa bắt đầu' }
   // }
-
+  let dealerPosition = Object.keys(data.position).find(p => data.position[p].namePos == 'D');
+  if (dealerPosition) {
+    const nextDealerPosition = findNextPosition({ position: dealerPosition });
+    data.position[dealerPosition].namePos = ''
+    data.position[nextDealerPosition].namePos = 'D'
+  }
   Object.keys(data.position).forEach(p => {
     if (data.position[p].user) {
       data.position[p].user.accBalance += data.position[p].winBalance || 0;
@@ -834,12 +866,6 @@ const reset = async () => {
     }],
     currentBet: 0,
     isShowDown: false,
-  }
-  let dealerPosition = Object.keys(data.position).find(p => data.position[p].namePos == 'D');
-  if (dealerPosition) {
-    const nextDealerPosition = findNextPosition({ position: dealerPosition });
-    data.position[dealerPosition].namePos = ''
-    data.position[nextDealerPosition].namePos = 'D'
   }
 }
 
