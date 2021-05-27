@@ -785,6 +785,9 @@ const reset = async () => {
       data.position[p].cards = []
     }
     data.position[p].isFold = false;
+    data.position[p].isThinking = false;
+    data.position[p].isPlaying = false;
+    data.position[p].betBalance = 0;
   })
   if (data.table.flop) {
     data.cards.push(...data.table.flop);
