@@ -858,6 +858,7 @@ const reset = async () => {
     data.position[p] = {
       ...POSITION,
       user: data.position[p].user,
+      namePos: data.position[p].namePos,
     }
   })
   if (data.table.flop) {
