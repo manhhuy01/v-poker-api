@@ -4,7 +4,7 @@ const game = require('./game')
 const db = require('./db')
 let io
 
-// const defaultRoom = 'v-poker-room-1'
+const defaultRoom = 'v-poker-room-1'
 
 const updateGame = (userName) => {
   let data = game.getRoomInfo(userName)
@@ -13,10 +13,14 @@ const updateGame = (userName) => {
 
 const updateAllPlayer = () => {
   let players = game.getAllPlayers();
-  players.forEach((player)=> {
+  players.forEach((player) => {
     let data = game.getRoomInfo(player.userName)
     io.to(player.userName).emit('data', data);
   })
+}
+
+const notifyToAllPlayer = ({ action }) => {
+  io.to(defaultRoom).emit('notification', action)
 }
 
 const init = (http) => {
@@ -31,20 +35,20 @@ const init = (http) => {
     try {
       const token = socket.handshake.query.token;
       const userName = (cryptr.decrypt(token) || '').split('|')[0]
-      if(!userName){
+      if (!userName) {
         console.log('io on connection !userName')
         return;
       }
       let info = await db.getInfoAccount({ userName })
-      // socket.join(defaultRoom)
+      socket.join(defaultRoom)
       socket.join(userName);
       game.addPlayer({ userName, balance: info?.data?.balance })
       updateAllPlayer();
-    
+
       socket.on('disconnect', () => {
         // socket.rooms.size === 0
       });
-    } catch (err){
+    } catch (err) {
       console.log('io connection err', err)
     }
 
@@ -57,4 +61,5 @@ module.exports = {
   init,
   updateGame,
   updateAllPlayer,
+  notifyToAllPlayer,
 }

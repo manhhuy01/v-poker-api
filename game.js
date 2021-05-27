@@ -55,6 +55,7 @@ const POSITION = {
   isThinking: false,
   isPlaying: false,
   winBalance: 0,
+  showCard: false,
 }
 
 const setData = (d) => data = d;
@@ -102,7 +103,7 @@ const getRoomInfo = (userName) => {
         newData.position[pos].user.accBalance = player.accBalance
       }
 
-      if (newData.position[pos].user.userName !== userName && (!newData.table.isShowDown || newData.position[pos].isFold)) {
+      if (!newData.position[pos].showCard && newData.position[pos].user.userName !== userName && (!newData.table.isShowDown || newData.position[pos].isFold)) {
         newData.position[pos] = {
           ...newData.position[pos],
           cards: newData.position[pos].cards.length ? ['u', 'u'] : [],
@@ -728,7 +729,7 @@ const playerBet = ({ position, betBalance, isAllIn = false }) => {
     }
     data.table.currentBet = betBalance;
   }
-  if(data.table.start){
+  if (data.table.start) {
     return processNextStepGame();
   }
   return {}
@@ -771,12 +772,23 @@ const playerFold = ({ position }) => {
   return processNextStepGame();
 }
 
+const playerShowCard = ({ position }) => {
+  if(!data.table.finish){
+    return { error: 'Ván chưa kết thúc'}
+  }
+  if(data.position[position].isFold){
+    return { error: 'Bạn đã bỏ bài'}
+  }
+  data.position[position].showCard = true;
+  return {}
+}
+
 const playerAction = ({ userName, type, betBalance = 0, isAllIn = false }) => {
 
   if (!data.table.start) {
     return { error: 'ván chưa bắt đầu' }
   }
-  if (data.table.finish) {
+  if (data.table.finish && type != 'SHOW') {
     return { error: 'Ván vừa kết thúc, chờ ván bắt đầu' }
   }
 
@@ -787,7 +799,7 @@ const playerAction = ({ userName, type, betBalance = 0, isAllIn = false }) => {
 
   let dataPosition = data.position[position]
 
-  if (!dataPosition.isThinking && !(data.table.start && !data.table.preFlop)) {
+  if (!data.table.finish && !dataPosition.isThinking && !(data.table.start && !data.table.preFlop)) {
     return { error: 'Chưa tới lượt' }
   }
 
@@ -795,7 +807,7 @@ const playerAction = ({ userName, type, betBalance = 0, isAllIn = false }) => {
     return { error: 'Bạn không có trong lượt chơi' }
   }
 
-  if (dataPosition.betBalance && !dataPosition.user.accBalance) {
+  if (data.table.preFlop && dataPosition.betBalance && !dataPosition.user.accBalance) {
     return { error: 'Bạn đã all in' }
   }
 
@@ -808,6 +820,8 @@ const playerAction = ({ userName, type, betBalance = 0, isAllIn = false }) => {
       return playerCall({ position })
     case 'FOLD':
       return playerFold({ position })
+    case 'SHOW':
+      return playerShowCard({ position })
     default:
       break;
   }
@@ -841,10 +855,10 @@ const reset = async () => {
       data.cards.push(...data.position[p].cards)
       data.position[p].cards = []
     }
-    data.position[p].isFold = false;
-    data.position[p].isThinking = false;
-    data.position[p].isPlaying = false;
-    data.position[p].betBalance = 0;
+    data.position[p] = {
+      ...POSITION,
+      user: data.position[p].user,
+    }
   })
   if (data.table.flop) {
     data.cards.push(...data.table.flop);
@@ -889,7 +903,6 @@ module.exports = {
   startGame,
   shuffleCards,
   preFlop,
-  flop,
   playerAction,
   reset,
 }
