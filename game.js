@@ -395,15 +395,15 @@ const setNextDealerAction = () => {
       isFound = false;
     }
   } while (isFindNext)
-  if(isFound) {
+  if (isFound) {
     data.table.firstActionPlayer = +nextPosition;
     data.position[nextPosition].isThinking = true;
     return {}
   } else {
     return { error: 'Không tìm thấy vị trí action ' }
   }
-  
- 
+
+
 }
 
 const flop = () => {
@@ -728,7 +728,10 @@ const playerBet = ({ position, betBalance, isAllIn = false }) => {
     }
     data.table.currentBet = betBalance;
   }
-  return processNextStepGame();
+  if(data.table.start){
+    return processNextStepGame();
+  }
+  return {}
 
 }
 
@@ -741,7 +744,7 @@ const playerCall = ({ position }) => {
   }
   if (data.position[position].user.accBalance + data.position[position].betBalance < data.table.currentBet) {
     // all-in
-    data.position[position].betBalance = data.position[position].user.accBalance;
+    data.position[position].betBalance = data.position[position].user.accBalance + data.position[position].betBalance;
     data.position[position].user.accBalance = 0;
 
   } else {
