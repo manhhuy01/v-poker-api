@@ -36,7 +36,6 @@ const init = (http) => {
       const token = socket.handshake.query.token;
       const userName = (cryptr.decrypt(token) || '').split('|')[0]
       if (!userName) {
-        console.log('io on connection !userName')
         return;
       }
       let info = await db.getInfoAccount({ userName })
@@ -45,8 +44,11 @@ const init = (http) => {
       game.addPlayer({ userName, balance: info?.data?.balance })
       updateAllPlayer();
 
-      socket.on('disconnect', () => {
-        // socket.rooms.size === 0
+      socket.on('disconnect', async () => {
+        const ids = await io.in(defaultRoom).allSockets();
+        if(!ids.size){
+          game.removeDealer()
+        }
       });
     } catch (err) {
       console.log('io connection err', err)

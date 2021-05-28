@@ -69,14 +69,20 @@ const authDealer = (req, res, next) => {
   next();
 }
 
-const setDealer = () => {
+const setDealer = (userName) => {
   if (!data.players.length) {
     console.log('game.setDealer: không có players')
     return
   }
-  if (!data.dealer) {
-    data.dealer = data.players[0].userName;
+  if (!data.dealer && userName) {
+    data.dealer = userName;
+    return;
   }
+  data.dealer = data.players[0].userName;
+}
+
+const removeDealer = () => {
+  data.dealer = undefined;
 }
 
 const addPlayer = ({ userName, balance }) => {
@@ -90,7 +96,7 @@ const addPlayer = ({ userName, balance }) => {
       accBalance: balance || 0,
     });
   }
-  setDealer();
+  setDealer(userName);
 }
 
 const getRoomInfo = (userName) => {
@@ -906,4 +912,5 @@ module.exports = {
   preFlop,
   playerAction,
   reset,
+  removeDealer,
 }
