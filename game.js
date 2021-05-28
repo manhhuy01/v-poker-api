@@ -738,7 +738,7 @@ const playerBet = ({ position, betBalance, isAllIn = false }) => {
     }
     data.table.currentBet = betBalance;
   }
-  if (data.table.start) {
+  if (data.table.preFlop) {
     return processNextStepGame();
   }
   return {}
