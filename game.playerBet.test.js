@@ -90,9 +90,7 @@ describe('playerBet', () => {
 
     game.setData(data);
     let rs = game.playerAction({ type: 'BET', userName: 'b', betBalance: 4 });
-    let newData = game.getData();
     expect(rs.error).toBe(undefined);
-    expect(newData.position[3].isThinking).toBe(true);
 
   })
   test('bet-all-in', ()=> {

@@ -634,7 +634,7 @@ const collectTablePot = () => {
         }
         pot.balance += minBetBalance;
         data.position[s].betBalance -= minBetBalance;
-        if (data.position[s].user.accBalance == 0) {
+        if (data.position[s].user.accBalance == 0 && data.position[s].betBalance == 0) {
           pot.isHavePlayerAllIn = true;
         }
       })
@@ -838,12 +838,7 @@ const playerAction = ({ userName, type, betBalance = 0, isAllIn = false }) => {
 }
 
 const reset = async () => {
-  // if (!data.table.finish) {
-  //   return { error: 'Ván chưa kết thúc' }
-  // }
-  // if (!data.table.start) {
-  //   return { error: 'Ván chưa bắt đầu' }
-  // }
+
   let dealerPosition = Object.keys(data.position).find(p => data.position[p].namePos == 'D');
   if (dealerPosition) {
     const nextDealerPosition = findNextPosition({ position: dealerPosition });
@@ -852,7 +847,7 @@ const reset = async () => {
   }
   Object.keys(data.position).forEach(p => {
     if (data.position[p].user) {
-      data.position[p].user.accBalance += data.position[p].winBalance || 0;
+      data.position[p].user.accBalance += ((data.position[p].winBalance || 0) + (data.position[p].betBalance || 0));
       db.updateBalance({ userName: data.position[p].user.userName, balance: data.position[p].user.accBalance })
       let player = data.players.find(player => player.userName === data.position[p].user.userName);
       if (player) {
