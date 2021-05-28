@@ -77,8 +77,11 @@ const setDealer = (userName) => {
   if (!data.dealer && userName) {
     data.dealer = userName;
     return;
+  } 
+  if(!data.dealer){
+    data.dealer = data.players[0].userName;
+    return;
   }
-  data.dealer = data.players[0].userName;
 }
 
 const removeDealer = () => {
