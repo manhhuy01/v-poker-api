@@ -1,6 +1,7 @@
 const Cryptr = require('cryptr');
 const cryptr = new Cryptr('manhhuy-v-poker-keys');
 const game = require('./game')
+const chat = require('./chat')
 const db = require('./db')
 let io
 
@@ -43,10 +44,16 @@ const init = (http) => {
       socket.join(userName);
       game.addPlayer({ userName, balance: info?.data?.balance })
       updateAllPlayer();
+      io.to(defaultRoom).emit('chat', chat.getData());
+
+      socket.on('sendMessage', ({ message, userName }) => {
+        chat.setMessage({message, userName})
+        socket.broadcast.to(defaultRoom).emit('chat', chat.getData());
+      })
 
       socket.on('disconnect', async () => {
         const ids = await io.in(defaultRoom).allSockets();
-        if(!ids.size){
+        if (!ids.size) {
           game.removeDealer()
         }
       });
