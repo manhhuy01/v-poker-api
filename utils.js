@@ -26,7 +26,7 @@ const findPairs = ({ analyticCards }) => {
     return agg;
   }, {})
   Object.keys(groupNum).forEach(t => {
-    if (groupNum[t].length == 2 && (!pairCard || (groupNum[t][0].value > pairCard[0].value))) {
+    if (groupNum[t].length >= 2 && (!pairCard || (groupNum[t][0].value > pairCard[0].value))) {
       pairCard = groupNum[t];
     }
   })
@@ -59,7 +59,7 @@ const findTreeOfKind = ({ analyticCards }) => {
     return agg;
   }, {})
   Object.keys(groupNum).forEach(t => {
-    if (groupNum[t].length == 3 && (!totk || (groupNum[t][0].value > totk[0].value))) {
+    if (groupNum[t].length >= 3 && (!totk || (groupNum[t][0].value > totk[0].value))) {
       totk = groupNum[t];
     }
   })

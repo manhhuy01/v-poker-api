@@ -15,12 +15,17 @@ const updateGame = (userName) => {
   io.to(userName).emit('data', data);
 }
 
-const updateAllPlayer = () => {
+const updateAllPlayer = async () => {
   let players = game.getAllPlayers();
   let gameData = game.getData();
   if (gameData.table.showDownAt) {
     chainUpdateToAllPlayer()
   } else {
+    players.forEach((player) => {
+      let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'space' })
+      io.to(player.userName).emit('data', data);
+    })
+    await utils.sleep(1000)
     players.forEach((player) => {
       let data = game.getRoomInfo({ userName: player.userName })
       io.to(player.userName).emit('data', data);
@@ -37,25 +42,25 @@ const chainUpdateToAllPlayer = async () => {
     switch (data.table.showDownAt) {
       case 'flop':
         players.forEach((player) => {
-          let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'showDown' })
-          io.to(player.userName).emit('data', data);
-        })
-        await utils.sleep(2000)
-        players.forEach((player) => {
           let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'flop' })
           io.to(player.userName).emit('data', data);
         })
-        await utils.sleep(2000)
+        await utils.sleep(3000)
         players.forEach((player) => {
           let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'turn' })
           io.to(player.userName).emit('data', data);
         })
-        await utils.sleep(2000)
+        await utils.sleep(3000)
         players.forEach((player) => {
           let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'river' })
           io.to(player.userName).emit('data', data);
         })
-        await utils.sleep(1000)
+        await utils.sleep(3000)
+        players.forEach((player) => {
+          let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'space' })
+          io.to(player.userName).emit('data', data);
+        })
+        await utils.sleep(1500)
         players.forEach((player) => {
           let data = game.getRoomInfo({ userName: player.userName })
           io.to(player.userName).emit('data', data);
@@ -63,20 +68,20 @@ const chainUpdateToAllPlayer = async () => {
         break;
       case 'turn':
         players.forEach((player) => {
-          let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'showDown' })
-          io.to(player.userName).emit('data', data);
-        })
-        await utils.sleep(2000)
-        players.forEach((player) => {
           let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'turn' })
           io.to(player.userName).emit('data', data);
         })
-        await utils.sleep(2000)
+        await utils.sleep(3000)
         players.forEach((player) => {
           let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'river' })
           io.to(player.userName).emit('data', data);
         })
-        await utils.sleep(1000)
+        await utils.sleep(3000)
+        players.forEach((player) => {
+          let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'space' })
+          io.to(player.userName).emit('data', data);
+        })
+        await utils.sleep(1500)
         players.forEach((player) => {
           let data = game.getRoomInfo({ userName: player.userName })
           io.to(player.userName).emit('data', data);
@@ -84,15 +89,15 @@ const chainUpdateToAllPlayer = async () => {
         break;
       case 'river':
         players.forEach((player) => {
-          let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'showDown' })
-          io.to(player.userName).emit('data', data);
-        })
-        await utils.sleep(2000)
-        players.forEach((player) => {
           let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'river' })
           io.to(player.userName).emit('data', data);
         })
-        await utils.sleep(1000)
+        await utils.sleep(3000)
+        players.forEach((player) => {
+          let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'space' })
+          io.to(player.userName).emit('data', data);
+        })
+        await utils.sleep(1500)
         players.forEach((player) => {
           let data = game.getRoomInfo({ userName: player.userName })
           io.to(player.userName).emit('data', data);

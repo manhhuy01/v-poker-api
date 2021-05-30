@@ -95,15 +95,25 @@ describe('test so card', () => {
     expect(rs.cards[2].num).toBe('5');
     expect(rs.cards[4].num).toBe('4');
   })
-  test('three 1', () => {
+  test('fullHouse 1', () => {
     let rs = utils.getHighestCards(['3d', '3c', '2s', '3h', '2c', '2d', '10s'])
+    expect(rs.name).toBe('fullHouse');
+    expect(rs.value).toBe(7);
+    expect(rs.cards[0].num).toBe('3');
+    expect(rs.cards[1].num).toBe('3');
+    expect(rs.cards[2].num).toBe('3');
+    expect(rs.cards[3].num).toBe('2');
+    expect(rs.cards[4].num).toBe('2');
+  })
+  test('tree 1', () => {
+    let rs = utils.getHighestCards(['3d', '3c', '5s', '3h', '9c', '2d', '10s'])
     expect(rs.name).toBe('totk');
     expect(rs.value).toBe(4);
     expect(rs.cards[0].num).toBe('3');
     expect(rs.cards[1].num).toBe('3');
     expect(rs.cards[2].num).toBe('3');
     expect(rs.cards[3].num).toBe('10');
-    expect(rs.cards[4].num).toBe('2');
+    expect(rs.cards[4].num).toBe('9');
   })
 
   test('compare 1', () => {
@@ -152,6 +162,14 @@ describe('test so card', () => {
     let flop = ['Ad', 'Qs', '6h', '10s', '6s']
     let handA = ['9c', 'Js']
     let handB = ['Ks', '7d']
+
+    let rs = utils.compare({ handA: [...flop, ...handA], handB: [...flop, ...handB] })
+    expect(rs).toBe(-1)
+  })
+  test('compare 6', () => {
+    let flop = ['7h', '2s', '2d', '2c', 'Ah']
+    let handA = ['Qc', 'Ad']
+    let handB = ['As', 'Ac']
 
     let rs = utils.compare({ handA: [...flop, ...handA], handB: [...flop, ...handB] })
     expect(rs).toBe(-1)

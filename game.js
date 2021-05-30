@@ -132,19 +132,19 @@ const getRoomInfo = ({ userName, showDownAt }) => {
 
   if (showDownAt) {
     switch (showDownAt) {
-      case 'showDown':
+      case 'flop':
         delete newData.table.flop;
         delete newData.table.turn;
         delete newData.table.river;
         break;
-      case 'flop':
+      case 'turn':
         delete newData.table.turn;
         delete newData.table.river;
         break;
-      case 'turn':
+      case 'river':
         delete newData.table.river;
         break;
-      case 'river':
+      case 'space':
         break;
       default:
         break;
@@ -451,6 +451,7 @@ const flop = () => {
 
   if (isShowDown()) {
     data.table.isShowDown = true;
+    data.table.showDownAt = data.table.showDownAt || 'flop'
   }
 
   let burnCard = data.cards.splice(0, 1);
@@ -496,6 +497,7 @@ const turn = () => {
 
   if (isShowDown()) {
     data.table.isShowDown = true;
+    data.table.showDownAt = data.table.showDownAt || 'turn'
   }
 
   let burnCard = data.cards.splice(0, 1);
@@ -536,6 +538,7 @@ const river = () => {
 
   if (isShowDown()) {
     data.table.isShowDown = true;
+    data.table.showDownAt = data.table.showDownAt || 'river'
   }
 
   let burnCard = data.cards.splice(0, 1);
@@ -696,25 +699,15 @@ const processNextStepGame = () => {
   collectTablePot();
 
   if (data.table.preFlop && !data.table.flop) {
-
     return flop();
   }
   if (data.table.flop && !data.table.turn) {
-    if (data.table.isShowDown && !data.table.showDownAt) {
-      data.table.showDownAt = 'flop'
-    }
     return turn();
   }
   if (data.table.turn && !data.table.river) {
-    if (data.table.isShowDown && !data.table.showDownAt) {
-      data.table.showDownAt = 'turn'
-    }
     return river();
   }
 
-  if (!data.table.showDownAt) {
-    data.table.showDownAt = 'river'
-  }
   return finish({ isShowDown: true });
 }
 
