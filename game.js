@@ -1,5 +1,24 @@
 const utils = require('./utils')
 const db = require('./db')
+
+const initTable = {
+  start: false,
+  preFlop: '',
+  flop: '',
+  turn: '',
+  river: '',
+  finish: false,
+  firstActionPlayer: undefined,
+  pot: [{
+    users: [],
+    balance: 0,
+    isHavePlayerAllIn: false,
+  }],
+  currentBet: 0,
+  isShowDown: false,
+  showDownAt: undefined,
+}
+
 let data = {
   setting: {
     smallBlind: 1,
@@ -21,22 +40,7 @@ let data = {
     8: {},
     9: {},
   },
-  table: {
-    start: false,
-    preFlop: '',
-    flop: '',
-    turn: '',
-    river: '',
-    finish: false,
-    firstActionPlayer: undefined,
-    pot: [{
-      users: [],
-      balance: 0,
-      isHavePlayerAllIn: false,
-    }],
-    currentBet: 0,
-    isShowDown: false,
-  },
+  table: JSON.parse(JSON.stringify(initTable)),
   cards: [
     '2s', '3s', '4s', '5s', '6s', '7s', '8s', '9s', '10s', 'Js', 'Qs', 'Ks', 'As',
     '2h', '3h', '4h', '5h', '6h', '7h', '8h', '9h', '10h', 'Jh', 'Qh', 'Kh', 'Ah',
@@ -45,6 +49,7 @@ let data = {
   ]
 
 }
+
 
 const POSITION = {
   user: undefined,
@@ -77,8 +82,8 @@ const setDealer = (userName) => {
   if (!data.dealer && userName) {
     data.dealer = userName;
     return;
-  } 
-  if(!data.dealer){
+  }
+  if (!data.dealer) {
     data.dealer = data.players[0].userName;
     return;
   }
@@ -102,7 +107,7 @@ const addPlayer = ({ userName, balance }) => {
   setDealer(userName);
 }
 
-const getRoomInfo = (userName) => {
+const getRoomInfo = ({ userName, showDownAt }) => {
   let newData = JSON.parse(JSON.stringify(data));
   delete newData.cards
   Object.keys(data.position).forEach((pos) => {
@@ -118,8 +123,34 @@ const getRoomInfo = (userName) => {
           cards: newData.position[pos].cards.length ? ['u', 'u'] : [],
         }
       }
+      if (showDownAt) {
+        delete newData.position[pos].resultCard
+        delete newData.position[pos].winBalance
+      }
     }
   })
+
+  if (showDownAt) {
+    switch (showDownAt) {
+      case 'showDown':
+        delete newData.table.flop;
+        delete newData.table.turn;
+        delete newData.table.river;
+        break;
+      case 'flop':
+        delete newData.table.turn;
+        delete newData.table.river;
+        break;
+      case 'turn':
+        delete newData.table.river;
+        break;
+      case 'river':
+        break;
+      default:
+        break;
+    }
+  }
+
   return newData;
 }
 
@@ -189,28 +220,6 @@ const findNextPosition = ({ position }) => {
     if (
       data.position[curPosition].isPlaying
       // && data.position[curPosition].user && data.position[curPosition].user.accBalance > 0
-    ) {
-      foundPosition = curPosition;
-    }
-  } while (!foundPosition)
-  return foundPosition;
-}
-
-const findPreviousPosition = ({ position, isPlaying = true }) => {
-  let foundPosition = undefined;
-  let curPosition = +position;
-  do {
-    curPosition -= 1;
-    if (curPosition == 0) {
-      curPosition = Object.keys(data.position).length;
-    }
-    if (+curPosition === +position) {
-      foundPosition = curPosition;
-    }
-    if (
-      !data.position[curPosition].isFold &&
-      data.position[curPosition].isPlaying === isPlaying &&
-      data.position[curPosition].user && data.position[curPosition].user.accBalance > 0
     ) {
       foundPosition = curPosition;
     }
@@ -687,15 +696,25 @@ const processNextStepGame = () => {
   collectTablePot();
 
   if (data.table.preFlop && !data.table.flop) {
+
     return flop();
   }
   if (data.table.flop && !data.table.turn) {
+    if (data.table.isShowDown && !data.table.showDownAt) {
+      data.table.showDownAt = 'flop'
+    }
     return turn();
   }
   if (data.table.turn && !data.table.river) {
+    if (data.table.isShowDown && !data.table.showDownAt) {
+      data.table.showDownAt = 'turn'
+    }
     return river();
   }
 
+  if (!data.table.showDownAt) {
+    data.table.showDownAt = 'river'
+  }
   return finish({ isShowDown: true });
 }
 
@@ -782,11 +801,11 @@ const playerFold = ({ position }) => {
 }
 
 const playerShowCard = ({ position }) => {
-  if(!data.table.finish){
-    return { error: 'Ván chưa kết thúc'}
+  if (!data.table.finish) {
+    return { error: 'Ván chưa kết thúc' }
   }
-  if(data.position[position].isFold){
-    return { error: 'Bạn đã bỏ bài'}
+  if (data.position[position].isFold) {
+    return { error: 'Bạn đã bỏ bài' }
   }
   data.position[position].showCard = true;
   return {}
@@ -874,21 +893,7 @@ const reset = async () => {
   if (data.table.river) {
     data.cards.push(data.table.river)
   }
-  data.table = {
-    start: false,
-    preFlop: '',
-    flop: '',
-    turn: '',
-    river: '',
-    finish: false,
-    firstActionPlayer: undefined,
-    pot: [{
-      users: [],
-      balance: 0,
-    }],
-    currentBet: 0,
-    isShowDown: false,
-  }
+  data.table = JSON.parse(JSON.stringify(initTable))
 }
 
 module.exports = {

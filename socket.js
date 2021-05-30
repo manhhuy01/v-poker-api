@@ -3,21 +3,108 @@ const cryptr = new Cryptr('manhhuy-v-poker-keys');
 const game = require('./game')
 const chat = require('./chat')
 const db = require('./db')
+const utils = require('./utils.js')
 let io
+
+let chainUpdate = false;
 
 const defaultRoom = 'v-poker-room-1'
 
 const updateGame = (userName) => {
-  let data = game.getRoomInfo(userName)
+  let data = game.getRoomInfo({ userName })
   io.to(userName).emit('data', data);
 }
 
 const updateAllPlayer = () => {
   let players = game.getAllPlayers();
-  players.forEach((player) => {
-    let data = game.getRoomInfo(player.userName)
-    io.to(player.userName).emit('data', data);
-  })
+  let gameData = game.getData();
+  if (gameData.table.showDownAt) {
+    chainUpdateToAllPlayer()
+  } else {
+    players.forEach((player) => {
+      let data = game.getRoomInfo({ userName: player.userName })
+      io.to(player.userName).emit('data', data);
+    })
+  }
+
+}
+
+const chainUpdateToAllPlayer = async () => {
+  if (!chainUpdate) {
+    chainUpdate = true;
+    let players = game.getAllPlayers();
+    let data = game.getData();
+    switch (data.table.showDownAt) {
+      case 'flop':
+        players.forEach((player) => {
+          let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'showDown' })
+          io.to(player.userName).emit('data', data);
+        })
+        await utils.sleep(2000)
+        players.forEach((player) => {
+          let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'flop' })
+          io.to(player.userName).emit('data', data);
+        })
+        await utils.sleep(2000)
+        players.forEach((player) => {
+          let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'turn' })
+          io.to(player.userName).emit('data', data);
+        })
+        await utils.sleep(2000)
+        players.forEach((player) => {
+          let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'river' })
+          io.to(player.userName).emit('data', data);
+        })
+        await utils.sleep(1000)
+        players.forEach((player) => {
+          let data = game.getRoomInfo({ userName: player.userName })
+          io.to(player.userName).emit('data', data);
+        })
+        break;
+      case 'turn':
+        players.forEach((player) => {
+          let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'showDown' })
+          io.to(player.userName).emit('data', data);
+        })
+        await utils.sleep(2000)
+        players.forEach((player) => {
+          let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'turn' })
+          io.to(player.userName).emit('data', data);
+        })
+        await utils.sleep(2000)
+        players.forEach((player) => {
+          let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'river' })
+          io.to(player.userName).emit('data', data);
+        })
+        await utils.sleep(1000)
+        players.forEach((player) => {
+          let data = game.getRoomInfo({ userName: player.userName })
+          io.to(player.userName).emit('data', data);
+        })
+        break;
+      case 'river':
+        players.forEach((player) => {
+          let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'showDown' })
+          io.to(player.userName).emit('data', data);
+        })
+        await utils.sleep(2000)
+        players.forEach((player) => {
+          let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'river' })
+          io.to(player.userName).emit('data', data);
+        })
+        await utils.sleep(1000)
+        players.forEach((player) => {
+          let data = game.getRoomInfo({ userName: player.userName })
+          io.to(player.userName).emit('data', data);
+        })
+        break;
+      default:
+        break;
+    }
+    chainUpdate = false;
+
+  }
+
 }
 
 const notifyToAllPlayer = ({ action }) => {
@@ -47,7 +134,7 @@ const init = (http) => {
       io.to(defaultRoom).emit('chat', chat.getData());
 
       socket.on('sendMessage', ({ message, userName }) => {
-        chat.setMessage({message, userName})
+        chat.setMessage({ message, userName })
         socket.broadcast.to(defaultRoom).emit('chat', chat.getData());
       })
 

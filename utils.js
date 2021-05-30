@@ -265,8 +265,14 @@ const compare = ({ handA = [], handB = [] }) => {
   return rs;
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
 module.exports = {
   shuffle,
   getHighestCards,
   compare,
+  sleep,
 }
