@@ -106,6 +106,7 @@ const chainUpdateToAllPlayer = async () => {
       default:
         break;
     }
+    game.setShowDownAt(undefined);
     chainUpdate = false;
 
   }

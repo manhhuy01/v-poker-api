@@ -889,6 +889,8 @@ const reset = async () => {
   data.table = JSON.parse(JSON.stringify(initTable))
 }
 
+const setShowDownAt = (value) => data.table.showDownAt = value;
+
 module.exports = {
   setData,
   getData,
@@ -909,4 +911,5 @@ module.exports = {
   playerAction,
   reset,
   removeDealer,
+  setShowDownAt,
 }
