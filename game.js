@@ -714,9 +714,9 @@ const processNextStepGame = () => {
 
 const playerBet = ({ position, betBalance, isAllIn = false }) => {
   if (!isAllIn) {
-    betBalance = +betBalance;
+    betBalance = Math.round(+betBalance);
 
-    if (betBalance == 'NaN') {
+    if (Number.isNaN(betBalance)) {
       return { error: 'Số tiền bet phải là số' }
     }
     if (betBalance < data.table.currentBet) {
@@ -934,12 +934,12 @@ const playerTip = ({ tip, userName}) => {
   if (!position) {
     return { error: 'Bạn đang không trên bàn' }
   }
-  let balance = +tip;
-  if (balance == 'NaN') {
+  let balance = Math.round(+tip);
+  if (Number.isNaN(balance)) {
     return { error: 'Số tiền tip phải là số' }
   }
-  if (balance <= 0) {
-    return { error: 'Số tiền tip không được <= 0' }
+  if (balance < 1) {
+    return { error: 'Số tiền tip không được < 1' }
   }
 
   if(data.position[position].user.accBalance + data.position[position].winBalance < balance){

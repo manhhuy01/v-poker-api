@@ -55,7 +55,7 @@ app.post('/game/updateProfile', auth.decryptToken, game.authDealer, (req, res) =
   if (!req?.user?.isDealer) {
     return res.sendStatus(401);
   }
-  if (!req.body.userName || +req.body.accBalance == 'NaN' || req.body.accBalance < 0) {
+  if (!req.body.userName || Number.isNaN(+req.body.accBalance) || req.body.accBalance < 0) {
     return res.sendStatus(400)
   }
   game.updateProfile(req.body)
@@ -68,7 +68,7 @@ app.post('/game/joinTable', auth.decryptToken, game.authDealer, (req, res) => {
   if (!req?.user?.isDealer) {
     return res.sendStatus(401);
   }
-  if (!req.body.userName || +req.body.position == 'NaN' || req.body.position < 0) {
+  if (!req.body.userName || Number.isNaN(+req.body.position) || req.body.position < 0) {
     return res.sendStatus(400)
   }
   let rs = game.joinTable(req.body)
@@ -200,20 +200,20 @@ app.post('/player/tip', auth.decryptToken, (req, res, next) => {
   if (rs.error) {
     res.status(400)
     return res.send({ error: rs.error })
-  } else {
-    socket.updateAllPlayer();
-  }
+  } 
+  socket.updateAllPlayer();
   res.send({})
   next();
 })
 
 app.use((req, res, next) => {
+
   switch (req.path) {
     case '/player/action':
       socket.notifyToAllPlayer({ id: Math.random(), action: req.body.type, userName: req?.user?.userName })
       break;
     case '/player/tip':
-      socket.notifyToAllPlayer({ id: Math.random(), action: 'TIP', userName: req?.user?.userName, tip: req.body.tip })
+      socket.notifyToAllPlayer({ id: Math.random(), action: 'TIP', userName: req?.user?.userName, tip: Math.round(+req.body.tip) })
       break;
     default:
       break;
