@@ -33,16 +33,7 @@ const http = require('http').createServer(app);
 socket.init(http);
 
 
-app.use((req, res, next)=> {
-  switch(req.path){
-    case '/player/action':
-      socket.notifyToAllPlayer({ action: req.body.type })
-      break;
-    default:
-      break;
-  }
-  next();
-})
+
 
 app.get('/', (req, res) => res.send('hello'));
 app.post('/register', auth.register)
@@ -157,14 +148,18 @@ app.post('/game/preFlop', auth.decryptToken, game.authDealer, (req, res) => {
   return res.send({ error: rs.error })
 })
 
-app.post('/player/action', auth.decryptToken, (req, res) => {
+app.post('/player/action', auth.decryptToken, (req, res, next) => {
   if (!req?.user) {
     return res.sendStatus(401);
   }
   let rs = game.playerAction({ ...req.body, userName: req.user.userName })
   socket.updateAllPlayer();
-  if (rs.error) res.status(400)
-  return res.send({ error: rs.error })
+  if (rs.error){
+    res.status(400)
+    return res.send({ error: rs.error })
+  } 
+  res.send({})
+  next();
 })
 
 app.post('/game/reset', auth.decryptToken, game.authDealer, (req, res) => {
@@ -181,10 +176,49 @@ app.post('/game/fold', auth.decryptToken, game.authDealer, (req, res) => {
   if (!req?.user?.isDealer) {
     return res.sendStatus(401);
   }
-  let rs = game.playerAction({ type:'FOLD', userName: req.body.userName })
+  let rs = game.playerAction({ type: 'FOLD', userName: req.body.userName })
   socket.updateAllPlayer();
   if (rs.error) res.status(400)
   return res.send({ error: rs.error })
+})
+
+app.post('/game/showAllCards', auth.decryptToken, game.authDealer, (req, res) => {
+  if (!req?.user?.isDealer) {
+    return res.sendStatus(401);
+  }
+  let rs = game.showAllCards();
+  socket.updateAllPlayer();
+  if (rs.error) res.status(400)
+  return res.send({ error: rs.error })
+})
+
+app.post('/player/tip', auth.decryptToken, (req, res, next) => {
+  if (!req?.user) {
+    return res.sendStatus(401);
+  }
+  let rs = game.playerTip({ ...req.body, userName: req.user.userName })
+  if (rs.error) {
+    res.status(400)
+    return res.send({ error: rs.error })
+  } else {
+    socket.updateAllPlayer();
+  }
+  res.send({})
+  next();
+})
+
+app.use((req, res, next) => {
+  switch (req.path) {
+    case '/player/action':
+      socket.notifyToAllPlayer({ id: Math.random(), action: req.body.type, userName: req?.user?.userName })
+      break;
+    case '/player/tip':
+      socket.notifyToAllPlayer({ id: Math.random(), action: 'TIP', userName: req?.user?.userName, tip: req.body.tip })
+      break;
+    default:
+      break;
+  }
+  next()
 })
 
 

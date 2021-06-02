@@ -708,6 +708,7 @@ const processNextStepGame = () => {
     return river();
   }
 
+  data.table.showDownAt = data.table.showDownAt || 'space'
   return finish({ isShowDown: true });
 }
 
@@ -891,6 +892,67 @@ const reset = async () => {
 
 const setShowDownAt = (value) => data.table.showDownAt = value;
 
+const showAllCards = () => {
+  if (data.table.river) {
+    return { error: 'Hết bài để show rồi' }
+  }
+  if (!data.table.finish) {
+    return { error: 'Ván chưa kết thúc' }
+  }
+  if (!data.table.start) {
+    return { error: 'Ván chưa bắt đầu' }
+  }
+  if (!data.table.flop) {
+    let burnCard = data.cards.splice(0, 1);
+    data.table.Flop = [];
+    [1, 2, 3].forEach(() => {
+      let card = data.cards.splice(0, 1);
+      data.table.flop = [...data.table.flop, card[0]]
+    })
+    data.cards.push(...burnCard)
+  }
+  if (!data.table.turn) {
+    let burnCard = data.cards.splice(0, 1);
+    data.table.turn = data.cards.splice(0, 1)[0];
+    data.cards.push(...burnCard)
+  }
+  if (!data.table.river) {
+    let burnCard = data.cards.splice(0, 1);
+    data.table.river = data.cards.splice(0, 1)[0];
+    data.cards.push(...burnCard)
+  }
+  return {}
+}
+
+const playerTip = ({ tip, userName}) => {
+
+  if(data.table.start && !data.table.finish){
+    return { error: 'Vô ván rồi k đc tip' }
+  }
+
+  let position = Object.keys(data.position).find(x => data.position[x].user?.userName === userName);
+  if (!position) {
+    return { error: 'Bạn đang không trên bàn' }
+  }
+  let balance = +tip;
+  if (balance == 'NaN') {
+    return { error: 'Số tiền tip phải là số' }
+  }
+  if (balance <= 0) {
+    return { error: 'Số tiền tip không được <= 0' }
+  }
+
+  if(data.position[position].user.accBalance + data.position[position].winBalance < balance){
+    return { error: 'Bạn k đủ tiền để tip'}
+  }
+  data.position[position].winBalance -= balance;
+  if(data.position[position].winBalance < 0) {
+    data.position[position].user.accBalance += data.position[position].winBalance;
+    data.position[position].winBalance = 0;
+  }
+  return {}
+}
+
 module.exports = {
   setData,
   getData,
@@ -912,4 +974,6 @@ module.exports = {
   reset,
   removeDealer,
   setShowDownAt,
+  showAllCards,
+  playerTip,
 }

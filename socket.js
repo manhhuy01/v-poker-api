@@ -22,11 +22,6 @@ const updateAllPlayer = async () => {
     chainUpdateToAllPlayer()
   } else {
     players.forEach((player) => {
-      let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'space' })
-      io.to(player.userName).emit('data', data);
-    })
-    await utils.sleep(1000)
-    players.forEach((player) => {
       let data = game.getRoomInfo({ userName: player.userName })
       io.to(player.userName).emit('data', data);
     })
@@ -103,6 +98,17 @@ const chainUpdateToAllPlayer = async () => {
           io.to(player.userName).emit('data', data);
         })
         break;
+      case 'space':
+        players.forEach((player) => {
+          let data = game.getRoomInfo({ userName: player.userName, showDownAt: 'space' })
+          io.to(player.userName).emit('data', data);
+        })
+        await utils.sleep(1000)
+        players.forEach((player) => {
+          let data = game.getRoomInfo({ userName: player.userName })
+          io.to(player.userName).emit('data', data);
+        })
+        break;
       default:
         break;
     }
@@ -113,8 +119,8 @@ const chainUpdateToAllPlayer = async () => {
 
 }
 
-const notifyToAllPlayer = ({ action }) => {
-  io.to(defaultRoom).emit('notification', action)
+const notifyToAllPlayer = (data) => {
+  io.to(defaultRoom).emit('notification', data)
 }
 
 const init = (http) => {
