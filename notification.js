@@ -5,7 +5,7 @@ const notification = (req, res, next) => {
     case '/player/action':
       let indexSound = undefined;
       if(req.body.type == 'BET') {
-        indexSound = Math.round(Math.random()*6) + 1;
+        indexSound = Math.round(Math.random()*6);
       }
       socket.notifyToAllPlayer({ 
         id: Math.random(), 
@@ -20,7 +20,7 @@ const notification = (req, res, next) => {
     case '/game/updateProfile':
       socket.notifyToAllPlayer({
         id: Math.random(), action: 'CASH-IN-OUT',
-        userName: req?.user?.userName,
+        userName: req.body?.userName,
         accBalance: +req.body.accBalance
       })
       break;
