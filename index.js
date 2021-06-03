@@ -7,8 +7,10 @@ const app = express();
 
 const auth = require('./auth')
 const game = require('./game')
+const notification = require('./notification')
 
 const cors = require('cors');
+const socket = require('./socket');
 
 var whitelist = ['http://localhost:3000', 'https://v-poker.vercel.app']
 var corsOptions = {
@@ -28,7 +30,7 @@ app.use(express.json());
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions))
 
-const socket = require('./socket');
+
 const http = require('http').createServer(app);
 socket.init(http);
 
@@ -51,7 +53,7 @@ app.post('/game/updateSetting', auth.decryptToken, game.authDealer, (req, res) =
   return res.send({})
 })
 
-app.post('/game/updateProfile', auth.decryptToken, game.authDealer, (req, res) => {
+app.post('/game/updateProfile', auth.decryptToken, game.authDealer, (req, res, next) => {
   if (!req?.user?.isDealer) {
     return res.sendStatus(401);
   }
@@ -60,8 +62,8 @@ app.post('/game/updateProfile', auth.decryptToken, game.authDealer, (req, res) =
   }
   game.updateProfile(req.body)
   socket.updateAllPlayer();
-
-  return res.send({})
+  res.send({})
+  next();
 })
 
 app.post('/game/joinTable', auth.decryptToken, game.authDealer, (req, res) => {
@@ -127,15 +129,21 @@ app.post('/game/start', auth.decryptToken, game.authDealer, (req, res) => {
   return res.send({ error: rs.error })
 })
 
-app.post('/game/shuffleCards', auth.decryptToken, game.authDealer, (req, res) => {
+app.post('/game/shuffleCards', auth.decryptToken, game.authDealer, (req, res, next) => {
   if (!req?.user?.isDealer) {
     return res.sendStatus(401);
   }
   let rs = game.shuffleCards()
   // tạm thời xào bài chưa cần thông báo chơi players
   // socket.updateAllPlayer();
-  if (rs.error) res.status(400)
-  return res.send({ error: rs.error })
+  if (rs.error) {
+    res.status(400)
+    return res.send({ error: rs.error })
+  }
+
+  res.send({})
+  next();
+  
 })
 
 app.post('/game/preFlop', auth.decryptToken, game.authDealer, (req, res) => {
@@ -206,20 +214,7 @@ app.post('/player/tip', auth.decryptToken, (req, res, next) => {
   next();
 })
 
-app.use((req, res, next) => {
-
-  switch (req.path) {
-    case '/player/action':
-      socket.notifyToAllPlayer({ id: Math.random(), action: req.body.type, userName: req?.user?.userName })
-      break;
-    case '/player/tip':
-      socket.notifyToAllPlayer({ id: Math.random(), action: 'TIP', userName: req?.user?.userName, tip: Math.round(+req.body.tip) })
-      break;
-    default:
-      break;
-  }
-  next()
-})
+app.use(notification)
 
 
 http.listen(PORT, () => console.log(`Listening on ${PORT}`));
