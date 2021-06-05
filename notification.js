@@ -5,7 +5,7 @@ const notification = (req, res, next) => {
     case '/player/action':
       let indexSound = undefined;
       if(req.body.type == 'BET') {
-        indexSound = Math.round(Math.random()*6);
+        indexSound = Math.round(Math.random()*100);
       }
       socket.notifyToAllPlayer({ 
         id: Math.random(), 
