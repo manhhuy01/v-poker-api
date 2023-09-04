@@ -6,7 +6,7 @@ const saltRounds = 10;
 
 const dbConfig = {
   user: 'tgnaicjf',
-  host: 'amazon-web-services::ap-east-1',
+  host: 'rain.db.elephantsql.com',
   database: 'tgnaicjf',
   password: 'CSYAGLbG4J1n4omGRJg9-dVmTGFHaR0m',
   port: 5432,
