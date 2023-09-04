@@ -5,10 +5,10 @@ const cryptr = new Cryptr('manhhuy-v-poker-keys');
 const saltRounds = 10;
 
 const dbConfig = {
-  user: 'xgmxjqvssqyssm',
-  host: 'ec2-52-0-114-209.compute-1.amazonaws.com',
-  database: 'dfq7upgaj6k5qk',
-  password: 'd6871c8cd148e7b8375529a0b26242fcaeb974cfc7393b4faee6d6be65568092',
+  user: 'tgnaicjf',
+  host: 'amazon-web-services::ap-east-1',
+  database: 'tgnaicjf',
+  password: 'CSYAGLbG4J1n4omGRJg9-dVmTGFHaR0m',
   port: 5432,
   ssl: { rejectUnauthorized: false }
 }
