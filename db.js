@@ -5,11 +5,11 @@ const cryptr = new Cryptr('manhhuy-v-poker-keys');
 const saltRounds = 10;
 
 const dbConfig = {
-  user: 'tgnaicjf',
-  host: 'rain.db.elephantsql.com',
-  database: 'tgnaicjf',
-  password: 'CSYAGLbG4J1n4omGRJg9-dVmTGFHaR0m',
-  port: 5432,
+  user: 'postgres.cwirpyorixnjitqzlimg',
+  host: 'aws-1-ap-south-1.pooler.supabase.com',
+  database: 'postgres',
+  password: 'Jc21=C+k,20UwD%9',
+  port: 6543,
   ssl: { rejectUnauthorized: false }
 }
 
