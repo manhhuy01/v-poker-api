@@ -1,0 +1,3 @@
+1. viết api get report từ transaction_log, game_log tính ra report cho mỗi user, mỗi item có { username (userId), totalDeposit, totalWithdraw, currentBalance, totalGame }, lưu ý chỉ tính sau dòng transaction_log có balance_after = 0 gần nhất theo thời gian tạo.
+
+2. viết api get report từ 1 user id, trả về game_log của user đó, mỗi item có { id, amount, type, balance_after, created_at }, có pagination theo 7 ngày, 30 ngày và 1 năm.

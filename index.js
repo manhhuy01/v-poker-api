@@ -8,6 +8,7 @@ const app = express();
 const auth = require('./auth')
 const game = require('./game')
 const notification = require('./notification')
+const report = require('./report')
 
 const cors = require('cors');
 const socket = require('./socket');
@@ -41,6 +42,8 @@ app.get('/', (req, res) => res.send('hello'));
 app.post('/register', auth.register)
 app.post('/login', auth.login)
 app.get('/acc/info', auth.decryptToken, auth.getInfo)
+app.get('/report/summary', auth.decryptToken, report.getSummaryReport)
+app.get('/report/game-logs/:userId', auth.decryptToken, report.getUserGameLogs)
 app.post('/game/updateSetting', auth.decryptToken, game.authDealer, (req, res) => {
   if (!req?.user?.isDealer) {
     return res.sendStatus(401);

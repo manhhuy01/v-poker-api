@@ -1,0 +1,32 @@
+const db = require('./db')
+
+const getSummaryReport = async (req, res) => {
+  const { error, data } = await db.getSummaryReport();
+  if (error) {
+    return res.status(500).send({ error: 'Internal Server Error' });
+  }
+  res.send({ data });
+}
+
+const getUserGameLogs = async (req, res) => {
+  const { userId } = req.params;
+  const days = parseInt(req.query.days) || 365;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 20;
+  const offset = (page - 1) * limit;
+
+  if (!userId) {
+    return res.status(400).send({ error: 'UserId is required' });
+  }
+
+  const { error, data } = await db.getUserGameLogs({ userId, days, limit, offset });
+  if (error) {
+    return res.status(500).send({ error: 'Internal Server Error' });
+  }
+  res.send({ data, page, limit });
+}
+
+module.exports = {
+  getSummaryReport,
+  getUserGameLogs,
+}

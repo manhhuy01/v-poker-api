@@ -1,6 +1,13 @@
 const utils = require('./utils')
 const db = require('./db')
 
+const initCards = [
+  '2s', '3s', '4s', '5s', '6s', '7s', '8s', '9s', '10s', 'Js', 'Qs', 'Ks', 'As',
+  '2h', '3h', '4h', '5h', '6h', '7h', '8h', '9h', '10h', 'Jh', 'Qh', 'Kh', 'Ah',
+  '2d', '3d', '4d', '5d', '6d', '7d', '8d', '9d', '10d', 'Jd', 'Qd', 'Kd', 'Ad',
+  '2c', '3c', '4c', '5c', '6c', '7c', '8c', '9c', '10c', 'Jc', 'Qc', 'Kc', 'Ac',
+]
+
 const initTable = {
   start: false,
   preFlop: '',
@@ -41,13 +48,7 @@ let data = {
     9: {},
   },
   table: JSON.parse(JSON.stringify(initTable)),
-  cards: [
-    '2s', '3s', '4s', '5s', '6s', '7s', '8s', '9s', '10s', 'Js', 'Qs', 'Ks', 'As',
-    '2h', '3h', '4h', '5h', '6h', '7h', '8h', '9h', '10h', 'Jh', 'Qh', 'Kh', 'Ah',
-    '2d', '3d', '4d', '5d', '6d', '7d', '8d', '9d', '10d', 'Jd', 'Qd', 'Kd', 'Ad',
-    '2c', '3c', '4c', '5c', '6c', '7c', '8c', '9c', '10c', 'Jc', 'Qc', 'Kc', 'Ac',
-  ]
-
+  cards: JSON.parse(JSON.stringify(initCards)),
 }
 
 
@@ -163,6 +164,13 @@ const updateProfile = async ({ userName, accBalance }) => {
   let player = data.players.find(x => x.userName === userName)
   if (!player) {
     console.log('update profile err no player')
+    return;
+  }
+  const oldBalance = player.accBalance;
+  if (oldBalance > accBalance) {
+    db.logTransaction({ userId: userName, amount: oldBalance - accBalance, type: 'withdraw', balanceAfter: accBalance });
+  } else if (oldBalance < accBalance) {
+    db.logTransaction({ userId: userName, amount: accBalance - oldBalance, type: 'deposit', balanceAfter: accBalance });
   }
   player.accBalance = accBalance;
   await db.updateBalance({ balance: accBalance, userName });
@@ -311,6 +319,14 @@ const startGame = () => {
   if (smallBlindPosition === dealerPosition) {
     return { error: 'Không đủ người chơi' };
   }
+
+  // ghi nhớ balance trước khi bắt đầu.
+  Object.keys(data.position).forEach(p => {
+    if (data.position[p].user) {
+      data.position[p].user.startBalance = data.position[p].user.accBalance;
+    }
+  })
+
   data.position[smallBlindPosition] = positionBet({ position: smallBlindPosition, bet: data.setting.smallBlind });
   const bigBlindPosition = findNextPosition({ position: smallBlindPosition });
   if (bigBlindPosition === smallBlindPosition) {
@@ -455,7 +471,7 @@ const flop = () => {
   }
 
   let burnCard = data.cards.splice(0, 1);
-  data.table.Flop = [];
+  data.table.flop = [];
   [1, 2, 3].forEach(() => {
     let card = data.cards.splice(0, 1);
     data.table.flop = [...data.table.flop, card[0]]
@@ -851,6 +867,9 @@ const playerAction = ({ userName, type, betBalance = 0, isAllIn = false }) => {
 }
 
 const reset = async () => {
+  if (data.table.finish) {
+    db.logPoker({ data: JSON.parse(JSON.stringify(data)) });
+  }
 
   let dealerPosition = Object.keys(data.position).find(p => data.position[p].namePos == 'D');
   if (dealerPosition) {
@@ -860,12 +879,21 @@ const reset = async () => {
   }
   Object.keys(data.position).forEach(p => {
     if (data.position[p].user) {
-      data.position[p].user.accBalance += ((data.position[p].winBalance || 0) + (data.position[p].betBalance || 0));
-      db.updateBalance({ userName: data.position[p].user.userName, balance: data.position[p].user.accBalance })
-      let player = data.players.find(player => player.userName === data.position[p].user.userName);
-      if (player) {
-        player.accBalance = data.position[p].user.accBalance;
+      
+      const oldAccBalance = data.position[p].user.startBalance;
+      const newAccBalance = data.position[p].user.accBalance + ((data.position[p].winBalance || 0) + (data.position[p].betBalance || 0));
+
+      if (data.position[p].isPlaying) {
+        if (oldAccBalance > newAccBalance) {
+          db.logGame({ userId: data.position[p].user.userName, amount: oldAccBalance - newAccBalance, type: 'lose', balanceAfter: newAccBalance });
+        } else if (oldAccBalance < newAccBalance) {
+          db.logGame({ userId: data.position[p].user.userName, amount: newAccBalance - oldAccBalance, type: 'win', balanceAfter: newAccBalance });
+        }
       }
+
+      data.position[p].user.accBalance = newAccBalance;
+      data.position[p].user.startBalance = newAccBalance;
+      db.updateBalance({ userName: data.position[p].user.userName, balance: data.position[p].user.accBalance })
       data.position[p].winBalance = 0;
     }
     if (data.position[p].cards?.length) {
@@ -887,6 +915,7 @@ const reset = async () => {
   if (data.table.river) {
     data.cards.push(data.table.river)
   }
+  data.cards = JSON.parse(JSON.stringify(initCards))
   data.table = JSON.parse(JSON.stringify(initTable))
 }
 

@@ -105,9 +105,141 @@ const updateBalance = async ({userName, balance}) => {
   return { error };
 }
 
+const logTransaction = async ({ userId, amount, type, balanceAfter }) => {
+  const client = new Client(dbConfig)
+  await client.connect();
+  let error = null;
+  try {
+    await client.query("INSERT INTO transaction_log (user_id, amount, type, balance_after) VALUES ($1, $2, $3, $4)", [userId, amount, type, balanceAfter]);
+  } catch (err) {
+    console.log('logTransaction error:', err)
+    error = err;
+  } finally {
+    await client.end();
+  }
+  return { error };
+}
+
+const logGame = async ({ userId, amount, type, balanceAfter }) => {
+  const client = new Client(dbConfig)
+  await client.connect();
+  let error = null;
+  try {
+    await client.query("INSERT INTO game_log (user_id, amount, type, balance_after) VALUES ($1, $2, $3, $4)", [userId, amount, type, balanceAfter]);
+  } catch (err) {
+    console.log('logGame error:', err)
+    error = err;
+  } finally {
+    await client.end();
+  }
+  return { error };
+}
+
+const logPoker = async ({ data }) => {
+  const client = new Client(dbConfig)
+  await client.connect();
+  let error = null;
+  try {
+    await client.query("INSERT INTO poker_log (data) VALUES ($1)", [JSON.stringify(data)]);
+  } catch (err) {
+    console.log('logPoker error:', err)
+    error = err;
+  } finally {
+    await client.end();
+  }
+  return { error };
+}
+const getSummaryReport = async () => {
+  const client = new Client(dbConfig)
+  await client.connect();
+  let error = null;
+  let data = [];
+  try {
+    const query = `
+      WITH user_ref AS (
+          SELECT user_id, MAX(created_at) as ref_time
+          FROM transaction_log
+          WHERE balance_after = 0
+          GROUP BY user_id
+      ),
+      trans_agg AS (
+          SELECT 
+              t.user_id,
+              SUM(CASE WHEN t.type = 'deposit' THEN t.amount ELSE 0 END) as total_deposit,
+              SUM(CASE WHEN t.type = 'withdraw' THEN t.amount ELSE 0 END) as total_withdraw
+          FROM transaction_log t
+          LEFT JOIN user_ref r ON t.user_id = r.user_id
+          WHERE t.created_at > COALESCE(r.ref_time, '1970-01-01')
+          GROUP BY t.user_id
+      ),
+      game_agg AS (
+          SELECT 
+              g.user_id,
+              COUNT(*) as total_game
+          FROM game_log g
+          LEFT JOIN user_ref r ON g.user_id = r.user_id
+          WHERE g.created_at > COALESCE(r.ref_time, '1970-01-01')
+          GROUP BY g.user_id
+      )
+      SELECT 
+          a.username as "username",
+          COALESCE(t.total_deposit, 0) as "totalDeposit",
+          COALESCE(t.total_withdraw, 0) as "totalWithdraw",
+          COALESCE(a.balance, 0) as "currentBalance",
+          COALESCE(g.total_game, 0) as "totalGame"
+      FROM accounts a
+      LEFT JOIN trans_agg t ON a.username = t.user_id
+      INNER JOIN game_agg g ON a.username = g.user_id
+      ORDER BY a.username ASC
+    `;
+    const res = await client.query(query);
+    data = res.rows;
+  } catch (err) {
+    console.log('getSummaryReport error:', err)
+    error = err;
+  } finally {
+    await client.end();
+  }
+  return { error, data };
+}
+
+const getUserGameLogs = async ({ userId, days, limit, offset }) => {
+  const client = new Client(dbConfig)
+  await client.connect();
+  let error = null;
+  let data = [];
+  try {
+    let interval = '1 year';
+    if (days === 7) interval = '7 days';
+    if (days === 30) interval = '30 days';
+    
+    const query = `
+      SELECT id, amount, type, balance_after, created_at
+      FROM game_log
+      WHERE user_id = $1 AND created_at >= NOW() - INTERVAL '${interval}'
+      ORDER BY created_at DESC
+      LIMIT $2 OFFSET $3
+    `;
+    const res = await client.query(query, [userId, limit, offset]);
+    data = res.rows;
+  } catch (err) {
+    console.log('getUserGameLogs error:', err)
+    error = err;
+  } finally {
+    await client.end();
+  }
+  return { error, data };
+}
+
+
 module.exports = {
   createUser,
   getUser,
   getInfoAccount,
   updateBalance,
+  logTransaction,
+  logGame,
+  logPoker,
+  getSummaryReport,
+  getUserGameLogs,
 }

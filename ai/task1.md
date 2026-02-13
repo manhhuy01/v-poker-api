@@ -1,0 +1,5 @@
+0. không cần viết migratio script, chỉ cần tạo file sql script bình thường, db là postgreSQL
+1. tạo 1 table transaction_log có các cột, user_id, amount, type, created_at, trong đó type có 2 giá trị là deposit và withdraw
+2. tạo 1 table game_log có các cột, user_id, amount, type, created_at, trong đó type có 2 giá trị là lose và win (thắng), tạo 1 table poker_log có các cột, id, data (jsonB), created_at
+3. mỗi khi gọi hàm updateProfile trong game, tính ra balance cũ và balance mới, nếu balance cũ lớn hơn balance mới thì ghi vào transaction_log với type là withdraw, ngược lại ghi vào transaction_log với type là deposit
+4. mỗi khi reset trong game, cần update vào game_log, nếu như accBalance cũ lớn hơn accBalance mới thì ghi vào game_log với type là lose, ngược lại ghi vào game_log với type là win với số tiền chênh lệch. 
