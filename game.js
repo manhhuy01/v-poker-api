@@ -171,6 +171,8 @@ const updateProfile = async ({ userName, accBalance }) => {
     db.logTransaction({ userId: userName, amount: oldBalance - accBalance, type: 'withdraw', balanceAfter: accBalance });
   } else if (oldBalance < accBalance) {
     db.logTransaction({ userId: userName, amount: accBalance - oldBalance, type: 'deposit', balanceAfter: accBalance });
+  } else if (accBalance == 0) {
+    db.logTransaction({ userId: userName, amount: 0, type: 'withdraw', balanceAfter: accBalance });
   }
   player.accBalance = accBalance;
   await db.updateBalance({ balance: accBalance, userName });
@@ -189,6 +191,9 @@ const joinTable = ({ userName, position }) => {
       ...POSITION,
       user: player,
     }
+  }
+  if (Object.values(data.position).map(x => !!x.user).filter(Boolean).length === 1) {
+    setDealerPosition({ userName })
   }
   return {}
 }
@@ -267,9 +272,6 @@ const setDealerPosition = ({ userName }) => {
 
   }
   const totalPlayerOnTable = Object.keys(data.position).map(x => data.position[x].user).filter(Boolean).length;
-  if (totalPlayerOnTable < 2) {
-    return { error: 'Bàn chưa đủ người chơi' }
-  }
   Object.keys(data.position).forEach((p) => data.position[p].namePos = '')
   data.position[position].namePos = 'D';
 
@@ -336,7 +338,7 @@ const startGame = () => {
   data.table.start = true;
   data.table.currentBet = data.setting.smallBlind * 2;
 
-  return {};
+  return preFlop();
 
 }
 
