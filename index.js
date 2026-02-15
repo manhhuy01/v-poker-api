@@ -56,8 +56,8 @@ app.post('/game/updateSetting', auth.decryptToken, game.authDealer, (req, res) =
   return res.send({})
 })
 
-app.post('/game/updateProfile', auth.decryptToken, game.authDealer, (req, res, next) => {
-  if (!req?.user?.isDealer) {
+app.post('/game/updateProfile', auth.decryptToken, (req, res, next) => {
+  if (!req?.user?.isDealer && req.user.userName !== req.body.userName) {
     return res.sendStatus(401);
   }
   if (!req.body.userName || Number.isNaN(+req.body.accBalance) || req.body.accBalance < 0) {
