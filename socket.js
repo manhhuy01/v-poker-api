@@ -147,7 +147,10 @@ const init = (http) => {
 
       socket.on('sendMessage', ({ message, userName }) => {
         chat.setMessage({ message, userName })
-        socket.broadcast.to(defaultRoom).emit('chat', chat.getData());
+        let players = game.getAllPlayers();
+        players.forEach((player) => {
+          io.to(player.userName).emit('chat', chat.getData());
+        })
       })
 
       socket.on('disconnect', async () => {
