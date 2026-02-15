@@ -69,10 +69,7 @@ app.post('/game/updateProfile', auth.decryptToken, game.authDealer, (req, res, n
   next();
 })
 
-app.post('/game/joinTable', auth.decryptToken, game.authDealer, (req, res) => {
-  if (!req?.user?.isDealer) {
-    return res.sendStatus(401);
-  }
+app.post('/game/joinTable', auth.decryptToken, (req, res) => {
   if (!req.body.userName || Number.isNaN(+req.body.position) || req.body.position < 0) {
     return res.sendStatus(400)
   }

@@ -186,6 +186,16 @@ const joinTable = ({ userName, position }) => {
   if (data.position[position].user) {
     return { error: 'Chỗ này có người rồi' }
   }
+  // nếu chỗ khác có chính user này thì tự remove ra 
+  let result = {};
+  Object.keys(data.position).forEach((p) => {
+    if (data.position[p].user?.userName === userName) {
+      result = removeFromTable({ userName })
+    }
+  })
+  if (result.error) {
+    return result;
+  }
   if (!data.position[position]?.user) {
     data.position[+position] = {
       ...POSITION,
