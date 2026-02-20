@@ -5,13 +5,15 @@ const cryptr = new Cryptr('manhhuy-v-poker-keys');
 const saltRounds = 10;
 
 const dbConfig = {
-  user: 'postgres.cwirpyorixnjitqzlimg',
-  host: 'aws-1-ap-south-1.pooler.supabase.com',
+  user: 'postgres.soborhtbdlfonqgwjibf',
+  host: 'aws-1-ap-southeast-1.pooler.supabase.com',
   database: 'postgres',
-  password: 'Jc21=C+k,20UwD%9',
+  password: 't38HZhZSRbSeTDdb',
   port: 6543,
   ssl: { rejectUnauthorized: false }
 }
+// wvyMRiGPLdloQbxQ
+// t38HZhZSRbSeTDdb
 
 const createUser = async ({ userName, password }) => {
   const client = new Client(dbConfig)
