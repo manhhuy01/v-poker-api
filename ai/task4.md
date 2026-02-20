@@ -1,0 +1,1 @@
+hãy viết function resetBalanceAllPlayers trong file db.js, thực hiện reset balance của tất cả các account có trong table account, và log transaction withdraw với amount = amount trước khi reset, balanceAfter = 0, thực hiện trong 1 câu query.

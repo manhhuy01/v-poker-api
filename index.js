@@ -13,7 +13,7 @@ const report = require('./report')
 const cors = require('cors');
 const socket = require('./socket');
 
-var whitelist = ['http://localhost:3000', 'https://v-poker.vercel.app']
+var whitelist = ['http://localhost:3000', 'https://v-poker.vercel.app', 'http://192.168.101.35:3000']
 var corsOptions = {
   credentials: true,
   origin: function (origin, callback) {
@@ -56,7 +56,7 @@ app.post('/game/updateSetting', auth.decryptToken, game.authDealer, (req, res) =
   return res.send({})
 })
 
-app.post('/game/updateProfile', auth.decryptToken, (req, res, next) => {
+app.post('/game/updateProfile', auth.decryptToken, game.authDealer, (req, res, next) => {
   if (!req?.user?.isDealer && req.user.userName !== req.body.userName) {
     return res.sendStatus(401);
   }
@@ -67,6 +67,15 @@ app.post('/game/updateProfile', auth.decryptToken, (req, res, next) => {
   socket.updateAllPlayer();
   res.send({})
   next();
+})
+
+app.post('/game/resetBalanceAllPlayers', auth.decryptToken, game.authDealer, (req, res) => {
+  if (!req?.user?.isDealer) {
+    return res.sendStatus(401);
+  }
+  game.resetBalanceAllPlayers();
+  socket.updateAllPlayer();
+  res.send({})
 })
 
 app.post('/game/joinTable', auth.decryptToken, (req, res) => {
@@ -80,7 +89,7 @@ app.post('/game/joinTable', auth.decryptToken, (req, res) => {
   return res.send({ error: rs.error })
 })
 
-app.post('/game/removeFromTable', auth.decryptToken, (req, res) => {
+app.post('/game/removeFromTable', auth.decryptToken, game.authDealer, (req, res) => {
   if (!req?.user?.isDealer && req.user.userName !== req.body.userName) {
     return res.sendStatus(401);
   }

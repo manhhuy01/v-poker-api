@@ -891,7 +891,7 @@ const reset = async () => {
   }
   Object.keys(data.position).forEach(p => {
     if (data.position[p].user) {
-      
+
       const oldAccBalance = data.position[p].user.startBalance;
       const newAccBalance = data.position[p].user.accBalance + ((data.position[p].winBalance || 0) + (data.position[p].betBalance || 0));
 
@@ -965,9 +965,9 @@ const showAllCards = () => {
   return {}
 }
 
-const playerTip = ({ tip, userName}) => {
+const playerTip = ({ tip, userName }) => {
 
-  if(data.table.start && !data.table.finish){
+  if (data.table.start && !data.table.finish) {
     return { error: 'Vô ván rồi k đc tip' }
   }
 
@@ -983,15 +983,22 @@ const playerTip = ({ tip, userName}) => {
     return { error: 'Số tiền tip không được < 1' }
   }
 
-  if(data.position[position].user.accBalance + data.position[position].winBalance < balance){
-    return { error: 'Bạn k đủ tiền để tip'}
+  if (data.position[position].user.accBalance + data.position[position].winBalance < balance) {
+    return { error: 'Bạn k đủ tiền để tip' }
   }
   data.position[position].winBalance -= balance;
-  if(data.position[position].winBalance < 0) {
+  if (data.position[position].winBalance < 0) {
     data.position[position].user.accBalance += data.position[position].winBalance;
     data.position[position].winBalance = 0;
   }
   return {}
+}
+
+const resetBalanceAllPlayers = () => {
+  db.resetBalanceAllPlayers();
+  Object.keys(data.players).forEach(p => {
+    data.players[p].accBalance = 0;
+  })
 }
 
 module.exports = {
@@ -1017,4 +1024,5 @@ module.exports = {
   setShowDownAt,
   showAllCards,
   playerTip,
+  resetBalanceAllPlayers,
 }

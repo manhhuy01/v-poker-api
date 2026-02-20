@@ -231,6 +231,32 @@ const getUserGameLogs = async ({ userId, days, limit, offset }) => {
   return { error, data };
 }
 
+const resetBalanceAllPlayers = async () => {
+  const client = new Client(dbConfig)
+  await client.connect();
+  let error = null;
+  try {
+    const query = `
+      WITH updated AS (
+        UPDATE accounts
+        SET balance = 0
+        RETURNING username, balance as old_balance
+      )
+      INSERT INTO transaction_log (user_id, amount, type, balance_after)
+      SELECT username, old_balance, 'withdraw', 0
+      FROM updated;
+    `;
+    await client.query(query);
+  } catch (err) {
+    console.log('resetBalanceAllPlayers error:', err)
+    error = err;
+  } finally {
+    await client.end();
+  }
+  return { error };
+}
+
+
 
 module.exports = {
   createUser,
@@ -242,4 +268,5 @@ module.exports = {
   logPoker,
   getSummaryReport,
   getUserGameLogs,
+  resetBalanceAllPlayers,
 }
