@@ -80,8 +80,8 @@ app.post('/game/joinTable', auth.decryptToken, (req, res) => {
   return res.send({ error: rs.error })
 })
 
-app.post('/game/removeFromTable', auth.decryptToken, game.authDealer, (req, res) => {
-  if (!req?.user?.isDealer) {
+app.post('/game/removeFromTable', auth.decryptToken, (req, res) => {
+  if (!req?.user?.isDealer && req.user.userName !== req.body.userName) {
     return res.sendStatus(401);
   }
   if (!req.body.userName) {
