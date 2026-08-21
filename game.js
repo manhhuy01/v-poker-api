@@ -947,7 +947,8 @@ const playerAction = ({ userName, type, betBalance = 0, isAllIn = false }) => {
 
 const reset = async () => {
   let pokerLogId = null;
-  if (data.table.finish) {
+  const shouldLogGame = !!data.table.finish;
+  if (shouldLogGame) {
     const rs = await db.logPoker({ data: JSON.parse(JSON.stringify(data)) });
     pokerLogId = rs?.data || null;
   }
@@ -964,7 +965,7 @@ const reset = async () => {
       const oldAccBalance = data.position[p].user.startBalance;
       const newAccBalance = data.position[p].user.accBalance + ((data.position[p].winBalance || 0) + (data.position[p].betBalance || 0));
 
-      if (data.position[p].isPlaying) {
+      if (shouldLogGame && data.position[p].isPlaying) {
         if (oldAccBalance > newAccBalance) {
           db.logGame({ userId: data.position[p].user.userName, amount: oldAccBalance - newAccBalance, type: 'lose', balanceAfter: newAccBalance, pokerLogId });
         } else if (oldAccBalance < newAccBalance) {
