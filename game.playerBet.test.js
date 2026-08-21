@@ -90,7 +90,12 @@ describe('playerBet', () => {
 
     game.setData(data);
     let rs = game.playerAction({ type: 'BET', userName: 'b', betBalance: 4 });
+    let newData = game.getData();
     expect(rs.error).toBe(undefined);
+    expect(newData.position[2].action).toBe('bet');
+    expect(newData.table.actions).toEqual([
+      { user: 'b', action: 'bet', amount: 3 }
+    ]);
 
   })
   test('bet-all-in', ()=> {
@@ -152,6 +157,10 @@ describe('playerBet', () => {
     let newData = game.getData();
     expect(rs.error).toBe(undefined);
     expect(newData.position[1].isThinking).toBe(true);
+    expect(newData.position[3].action).toBe('all-in');
+    expect(newData.table.actions).toEqual([
+      { user: 'c', action: 'all-in', amount: 2 }
+    ]);
 
   })
 
@@ -213,6 +222,10 @@ describe('playerBet', () => {
     let rs = game.playerAction({ type: 'BET', userName: 'c', betBalance: 87, isAllIn: true });
     let newData = game.getData();
     expect(newData.position[3].user.accBalance).toBe(0);
+    expect(newData.position[3].action).toBe('all-in');
+    expect(newData.table.actions).toEqual([
+      { user: 'c', action: 'all-in', amount: 87 }
+    ]);
 
   })
 })

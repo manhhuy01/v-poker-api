@@ -24,6 +24,7 @@ const initTable = {
   currentBet: 0,
   isShowDown: false,
   showDownAt: undefined,
+  actions: [],
 }
 
 let data = {
@@ -62,6 +63,7 @@ const POSITION = {
   isPlaying: false,
   winBalance: 0,
   showCard: false,
+  action: '',
 }
 
 const setData = (d) => data = d;
@@ -293,6 +295,24 @@ const positionBet = ({ position, bet = 0 }) => {
   newPos.betBalance = +Math.min(bet, newPos.user.accBalance);
   newPos.user.accBalance -= newPos.betBalance;
   return newPos
+}
+
+const setPositionAction = ({ position, action, amount = 0 }) => {
+  data.position[position].action = action;
+  data.table.actions = data.table.actions || [];
+  data.table.actions.push({
+    user: data.position[position].user.userName,
+    action,
+    amount,
+  });
+}
+
+const resetPositionActions = () => {
+  Object.keys(data.position).forEach(p => {
+    if (data.position[p].user) {
+      data.position[p].action = '';
+    }
+  })
 }
 
 const startGame = () => {
@@ -681,6 +701,7 @@ const collectTablePot = () => {
       betPositions = betPositions.filter(p => data.position[p].betBalance > 0);
     } while (betPositions.length)
   }
+  resetPositionActions();
 
 }
 
@@ -861,26 +882,74 @@ const playerAction = ({ userName, type, betBalance = 0, isAllIn = false }) => {
     return { error: 'Bạn đã all in' }
   }
 
+  const oldCurrentBet = data.table.currentBet || 0;
+  const oldAccBalance = dataPosition.user.accBalance || 0;
+  const oldRound = JSON.stringify({
+    flop: data.table.flop,
+    turn: data.table.turn,
+    river: data.table.river,
+    finish: data.table.finish,
+  });
+  let rs = {};
+
   switch (type) {
     case 'BET':
-      return playerBet({ position, betBalance, isAllIn })
+      rs = playerBet({ position, betBalance, isAllIn })
+      break;
     case 'CHECK':
-      return playerCheck({ position })
+      rs = playerCheck({ position })
+      break;
     case 'CALL':
-      return playerCall({ position })
+      rs = playerCall({ position })
+      break;
     case 'FOLD':
-      return playerFold({ position })
+      rs = playerFold({ position })
+      break;
     case 'SHOW':
       return playerShowCard({ position })
     default:
-      break;
+      return { error: 'Không có action nào đc diễn ra' }
   }
-  return { error: 'Không có action nào đc diễn ra' }
+
+  if (!rs.error) {
+    const newBetBalance = data.position[position].betBalance || 0;
+    const amount = Math.max(oldAccBalance - (data.position[position].user.accBalance || 0), 0);
+    let action = type.toLowerCase();
+
+    if (type === 'BET') {
+      if (isAllIn || data.position[position].user.accBalance === 0) {
+        action = 'all-in';
+      } else if (oldCurrentBet > 0 && newBetBalance > oldCurrentBet) {
+        action = 'raise';
+      } else {
+        action = 'bet';
+      }
+    }
+
+    if (type === 'CALL' && data.position[position].user.accBalance === 0) {
+      action = 'all-in';
+    }
+
+    setPositionAction({ position, action, amount });
+    const newRound = JSON.stringify({
+      flop: data.table.flop,
+      turn: data.table.turn,
+      river: data.table.river,
+      finish: data.table.finish,
+    });
+    if (oldRound !== newRound) {
+      resetPositionActions();
+    }
+  }
+
+  return rs;
 }
 
 const reset = async () => {
+  let pokerLogId = null;
   if (data.table.finish) {
-    db.logPoker({ data: JSON.parse(JSON.stringify(data)) });
+    const rs = await db.logPoker({ data: JSON.parse(JSON.stringify(data)) });
+    pokerLogId = rs?.data || null;
   }
 
   let dealerPosition = Object.keys(data.position).find(p => data.position[p].namePos == 'D');
@@ -897,9 +966,9 @@ const reset = async () => {
 
       if (data.position[p].isPlaying) {
         if (oldAccBalance > newAccBalance) {
-          db.logGame({ userId: data.position[p].user.userName, amount: oldAccBalance - newAccBalance, type: 'lose', balanceAfter: newAccBalance });
+          db.logGame({ userId: data.position[p].user.userName, amount: oldAccBalance - newAccBalance, type: 'lose', balanceAfter: newAccBalance, pokerLogId });
         } else if (oldAccBalance < newAccBalance) {
-          db.logGame({ userId: data.position[p].user.userName, amount: newAccBalance - oldAccBalance, type: 'win', balanceAfter: newAccBalance });
+          db.logGame({ userId: data.position[p].user.userName, amount: newAccBalance - oldAccBalance, type: 'win', balanceAfter: newAccBalance, pokerLogId });
         }
       }
 

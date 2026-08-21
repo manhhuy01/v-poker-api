@@ -179,11 +179,11 @@ app.post('/player/action', auth.decryptToken, (req, res, next) => {
   next();
 })
 
-app.post('/game/reset', auth.decryptToken, game.authDealer, (req, res) => {
+app.post('/game/reset', auth.decryptToken, game.authDealer, async (req, res) => {
   if (!req?.user?.isDealer) {
     return res.sendStatus(401);
   }
-  let rs = game.reset()
+  let rs = await game.reset()
   socket.updateAllPlayer();
   if (rs.error) res.status(400)
   return res.send({ error: rs.error })

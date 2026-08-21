@@ -94,9 +94,84 @@ describe('playerCall', () => {
     expect(rs.error).toBe(undefined);
     expect(newData.position[2].betBalance).toBe(4);
     expect(newData.position[2].user.accBalance).toBe(18);
+    expect(newData.position[2].action).toBe('call');
+    expect(newData.table.actions).toEqual([
+      { user: 'b', action: 'call', amount: 2 }
+    ]);
     expect(newData.position[3].isThinking).toBe(true);
 
   })
+
+  test('clear latest actions after moving to next round', () => {
+    const data = {
+      setting: {
+        smallBlind: 1,
+      },
+      players,
+      position: {
+        1: {
+          user: {
+            userName: 'a',
+            accBalance: 20,
+          },
+          betBalance: 4,
+          isFold: false,
+          namePos: 'D',
+          cards: [],
+          isThinking: false,
+          isPlaying: true,
+          action: 'bet',
+        },
+        2: {
+          user: {
+            userName: 'b',
+            accBalance: 20,
+          },
+          betBalance: 4,
+          isFold: false,
+          namePos: '',
+          cards: [],
+          isThinking: true,
+          isPlaying: true,
+          action: 'call',
+        },
+        3: {},
+        4: {},
+        5: {},
+        6: {},
+        7: {},
+        8: {},
+        9: {},
+      },
+      cards,
+      table: {
+        start: true,
+        preFlop: true,
+        flop: '',
+        turn: '',
+        river: '',
+        finish: false,
+        firstActionPlayer: 1,
+        pot: [{
+          users: [],
+          balance: 0,
+          isHavePlayerAllIn: false,
+        }],
+        currentBet: 4,
+        actions: [],
+      },
+    }
+
+    game.setData(data);
+    let rs = game.playerAction({ type: 'CHECK', userName: 'b' });
+    let newData = game.getData();
+    expect(rs.error).toBe(undefined);
+    expect(!!newData.table.flop).toBe(true);
+    expect(newData.position[1].action).toBe('');
+    expect(newData.position[2].action).toBe('');
+    expect(newData.position[3].action).toBe(undefined);
+  })
+
   test('call all in', () => {
 
     const data = {
@@ -168,6 +243,10 @@ describe('playerCall', () => {
     expect(rs.error).toBe(undefined);
     expect(newData.position[2].betBalance).toBe(8);
     expect(newData.position[2].user.accBalance).toBe(0);
+    expect(newData.position[2].action).toBe('all-in');
+    expect(newData.table.actions).toEqual([
+      { user: 'b', action: 'all-in', amount: 8 }
+    ]);
     expect(newData.position[3].isThinking).toBe(true);
 
   })

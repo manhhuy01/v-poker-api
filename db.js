@@ -120,12 +120,12 @@ const logTransaction = async ({ userId, amount, type, balanceAfter }) => {
   return { error };
 }
 
-const logGame = async ({ userId, amount, type, balanceAfter }) => {
+const logGame = async ({ userId, amount, type, balanceAfter, pokerLogId }) => {
   const client = new Client(dbConfig)
   await client.connect();
   let error = null;
   try {
-    await client.query("INSERT INTO game_log (user_id, amount, type, balance_after) VALUES ($1, $2, $3, $4)", [userId, amount, type, balanceAfter]);
+    await client.query("INSERT INTO game_log (user_id, amount, type, balance_after, poker_log_id) VALUES ($1, $2, $3, $4, $5)", [userId, amount, type, balanceAfter, pokerLogId || null]);
   } catch (err) {
     console.log('logGame error:', err)
     error = err;
@@ -139,15 +139,17 @@ const logPoker = async ({ data }) => {
   const client = new Client(dbConfig)
   await client.connect();
   let error = null;
+  let insertedId = null;
   try {
-    await client.query("INSERT INTO poker_log (data) VALUES ($1)", [JSON.stringify(data)]);
+    const res = await client.query("INSERT INTO poker_log (data) VALUES ($1) RETURNING id", [JSON.stringify(data)]);
+    insertedId = res.rows[0]?.id || null;
   } catch (err) {
     console.log('logPoker error:', err)
     error = err;
   } finally {
     await client.end();
   }
-  return { error };
+  return { error, data: insertedId };
 }
 const getSummaryReport = async () => {
   const client = new Client(dbConfig)
@@ -214,7 +216,7 @@ const getUserGameLogs = async ({ userId, days, limit, offset }) => {
     if (days === 30) interval = '30 days';
     
     const query = `
-      SELECT id, amount, type, balance_after, created_at
+      SELECT id, amount, type, balance_after, poker_log_id, created_at
       FROM game_log
       WHERE user_id = $1 AND created_at >= NOW() - INTERVAL '${interval}'
       ORDER BY created_at DESC

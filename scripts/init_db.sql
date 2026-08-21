@@ -18,6 +18,13 @@ CREATE TABLE IF NOT EXISTS transaction_log (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Create poker_log table
+CREATE TABLE IF NOT EXISTS poker_log (
+    id SERIAL PRIMARY KEY,
+    data JSONB NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create game_log table
 CREATE TABLE IF NOT EXISTS game_log (
     id SERIAL PRIMARY KEY,
@@ -25,12 +32,6 @@ CREATE TABLE IF NOT EXISTS game_log (
     amount DECIMAL(20, 2) NOT NULL,
     type VARCHAR(20) CHECK (type IN ('lose', 'win')),
     balance_after DECIMAL(20, 2),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- Create poker_log table
-CREATE TABLE IF NOT EXISTS poker_log (
-    id SERIAL PRIMARY KEY,
-    data JSONB NOT NULL,
+    poker_log_id INTEGER,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
