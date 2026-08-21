@@ -26,7 +26,25 @@ const getUserGameLogs = async (req, res) => {
   res.send({ data, page, limit });
 }
 
+const getPokerLog = async (req, res) => {
+  const { pokerLogId } = req.params;
+
+  if (!pokerLogId || Number.isNaN(+pokerLogId)) {
+    return res.status(400).send({ error: 'PokerLogId is required' });
+  }
+
+  const { error, data } = await db.getPokerLogById({ pokerLogId });
+  if (error) {
+    return res.status(500).send({ error: 'Internal Server Error' });
+  }
+  if (!data) {
+    return res.status(404).send({ error: 'Poker log not found' });
+  }
+  res.send({ data });
+}
+
 module.exports = {
   getSummaryReport,
   getUserGameLogs,
+  getPokerLog,
 }

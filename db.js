@@ -233,6 +233,26 @@ const getUserGameLogs = async ({ userId, days, limit, offset }) => {
   return { error, data };
 }
 
+const getPokerLogById = async ({ pokerLogId }) => {
+  const client = new Client(dbConfig)
+  await client.connect();
+  let error = null;
+  let data = null;
+  try {
+    const res = await client.query(
+      "SELECT id, data, created_at FROM poker_log WHERE id = $1",
+      [pokerLogId]
+    );
+    data = res.rows[0] || null;
+  } catch (err) {
+    console.log('getPokerLogById error:', err)
+    error = err;
+  } finally {
+    await client.end();
+  }
+  return { error, data };
+}
+
 const resetBalanceAllPlayers = async () => {
   const client = new Client(dbConfig)
   await client.connect();
@@ -270,5 +290,6 @@ module.exports = {
   logPoker,
   getSummaryReport,
   getUserGameLogs,
+  getPokerLogById,
   resetBalanceAllPlayers,
 }
