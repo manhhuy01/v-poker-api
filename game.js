@@ -96,7 +96,7 @@ const removeDealer = () => {
   data.dealer = undefined;
 }
 
-const addPlayer = ({ userName, balance }) => {
+const addPlayer = ({ userName, userId, balance }) => {
   if (!userName) {
     console.log('game.addPlayer: userName error')
     return;
@@ -104,6 +104,7 @@ const addPlayer = ({ userName, balance }) => {
   if (!data.players.map(x => x.userName).includes(userName)) {
     data.players.push({
       userName,
+      userId,
       accBalance: balance || 0,
     });
   }
@@ -126,8 +127,10 @@ const getRoomInfo = ({ userName, showDownAt }) => {
           cards: newData.position[pos].cards.length ? ['u', 'u'] : [],
         }
       }
-      if (showDownAt) {
+      if (!data.table.finish && newData.position[pos].user.userName !== userName) {
         delete newData.position[pos].resultCard
+      }
+      if (showDownAt) {
         delete newData.position[pos].winBalance
       }
     }
@@ -157,6 +160,20 @@ const getRoomInfo = ({ userName, showDownAt }) => {
   return newData;
 }
 
+const updateCurrentResultCards = () => {
+  const roundCards = [
+    ...((data.table.flop && Array.isArray(data.table.flop)) ? data.table.flop : []),
+    ...(data.table.turn ? [data.table.turn] : []),
+    ...(data.table.river ? [data.table.river] : []),
+  ]
+
+  Object.keys(data.position).forEach((p) => {
+    if (data.position[p].cards?.length) {
+      data.position[p].resultCard = utils.getHighestCards([...roundCards, ...data.position[p].cards]);
+    }
+  })
+}
+
 const updateSetting = ({ smallBlind }) => {
   data.setting.smallBlind = smallBlind;
   // data.setting.dealerAlsoPlayer = !!dealerAlsoPlayer
@@ -170,11 +187,11 @@ const updateProfile = async ({ userName, accBalance }) => {
   }
   const oldBalance = player.accBalance;
   if (oldBalance > accBalance) {
-    db.logTransaction({ userId: userName, amount: oldBalance - accBalance, type: 'withdraw', balanceAfter: accBalance });
+    db.logTransaction({ userId: player.userId, amount: oldBalance - accBalance, type: 'withdraw', balanceAfter: accBalance });
   } else if (oldBalance < accBalance) {
-    db.logTransaction({ userId: userName, amount: accBalance - oldBalance, type: 'deposit', balanceAfter: accBalance });
+    db.logTransaction({ userId: player.userId, amount: accBalance - oldBalance, type: 'deposit', balanceAfter: accBalance });
   } else if (accBalance == 0) {
-    db.logTransaction({ userId: userName, amount: 0, type: 'withdraw', balanceAfter: accBalance });
+    db.logTransaction({ userId: player.userId, amount: 0, type: 'withdraw', balanceAfter: accBalance });
   }
   player.accBalance = accBalance;
   await db.updateBalance({ balance: accBalance, userName });
@@ -406,6 +423,7 @@ const preFlop = () => {
       data.position[p].cards = [...data.position[p].cards, card[0]];
     })
   })
+  updateCurrentResultCards();
   data.table.preFlop = true;
 
   // find first action player
@@ -509,6 +527,7 @@ const flop = () => {
     data.table.flop = [...data.table.flop, card[0]]
   })
   data.cards.push(...burnCard)
+  updateCurrentResultCards();
 
   const dealerPosition = Object.keys(data.position).find(p => data.position[p].namePos === 'D');
   if (!dealerPosition) {
@@ -551,6 +570,7 @@ const turn = () => {
   let burnCard = data.cards.splice(0, 1);
   data.table.turn = data.cards.splice(0, 1)[0];
   data.cards.push(...burnCard)
+  updateCurrentResultCards();
 
   if (data.table.isShowDown) {
     return processNextStepGame();
@@ -592,6 +612,7 @@ const river = () => {
   let burnCard = data.cards.splice(0, 1);
   data.table.river = data.cards.splice(0, 1)[0];
   data.cards.push(...burnCard)
+  updateCurrentResultCards();
 
   if (data.table.isShowDown) {
     return processNextStepGame();
@@ -623,11 +644,7 @@ const finish = ({ isShowDown = true }) => {
 
   // so bài chia tiền
   if (isShowDown) {
-    Object.keys(data.position).forEach(p => {
-      if (data.position[p].cards?.length) {
-        data.position[p].resultCard = utils.getHighestCards([...data.table.flop, data.table.turn, data.table.river, ...data.position[p].cards]);
-      }
-    })
+    updateCurrentResultCards();
   }
 
 
@@ -967,9 +984,9 @@ const reset = async () => {
 
       if (shouldLogGame && data.position[p].isPlaying) {
         if (oldAccBalance > newAccBalance) {
-          db.logGame({ userId: data.position[p].user.userName, amount: oldAccBalance - newAccBalance, type: 'lose', balanceAfter: newAccBalance, pokerLogId });
+          db.logGame({ userId: data.position[p].user.userId, amount: oldAccBalance - newAccBalance, type: 'lose', balanceAfter: newAccBalance, pokerLogId });
         } else if (oldAccBalance < newAccBalance) {
-          db.logGame({ userId: data.position[p].user.userName, amount: newAccBalance - oldAccBalance, type: 'win', balanceAfter: newAccBalance, pokerLogId });
+          db.logGame({ userId: data.position[p].user.userId, amount: newAccBalance - oldAccBalance, type: 'win', balanceAfter: newAccBalance, pokerLogId });
         }
       }
 

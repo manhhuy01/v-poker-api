@@ -76,7 +76,16 @@ const getInfo = async (req, res) => {
     res.status(400);
     return res.send({ error: 'không tìm thấy' })
   } else {
-    return res.send({ userName: user.userName })
+    const { error, data } = await db.getAccountByUserName({ userName: user.userName });
+    if (error) {
+      res.status(500);
+      return res.send({ error: 'Internal Server Error' });
+    }
+    if (!data) {
+      res.status(404);
+      return res.send({ error: 'không tìm thấy' });
+    }
+    return res.send({ userName: data.username, id: data.id })
   }
 }
 

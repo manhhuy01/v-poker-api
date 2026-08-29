@@ -40,6 +40,16 @@ const getPokerLog = async (req, res) => {
   if (!data) {
     return res.status(404).send({ error: 'Poker log not found' });
   }
+  if (!data.is_available) {
+    return res.status(403).send({
+      error: 'Poker log is not available yet',
+      code: 'POKER_LOG_NOT_AVAILABLE_YET',
+      data: {
+        created_at: data.created_at,
+        available_at: data.available_at,
+      },
+    });
+  }
   res.send({ data });
 }
 

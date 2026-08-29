@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS accounts (
 -- Create transaction_log table
 CREATE TABLE IF NOT EXISTS transaction_log (
     id SERIAL PRIMARY KEY,
-    user_id VARCHAR(255) NOT NULL,
+    user_id BIGINT NOT NULL,
     amount DECIMAL(20, 2) NOT NULL,
     type VARCHAR(20) CHECK (type IN ('deposit', 'withdraw')),
     balance_after DECIMAL(20, 2),
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS poker_log (
 -- Create game_log table
 CREATE TABLE IF NOT EXISTS game_log (
     id SERIAL PRIMARY KEY,
-    user_id VARCHAR(255) NOT NULL,
+    user_id BIGINT NOT NULL,
     amount DECIMAL(20, 2) NOT NULL,
     type VARCHAR(20) CHECK (type IN ('lose', 'win')),
     balance_after DECIMAL(20, 2),

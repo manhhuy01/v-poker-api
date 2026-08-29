@@ -73,6 +73,7 @@ const getInfoAccount = async ({ userName }) => {
         return {
           error,
           data: {
+            id: res.rows[0].id,
             userName: res.rows[0].username,
             balance: +res.rows[0].balance || 0,
           }
@@ -88,6 +89,26 @@ const getInfoAccount = async ({ userName }) => {
     await client.end();
   }
   return { error };
+}
+
+const getAccountByUserName = async ({ userName }) => {
+  const client = new Client(dbConfig)
+  await client.connect();
+  let error = null;
+  let data = null;
+  try {
+    const res = await client.query(
+      "SELECT id, username, balance FROM accounts WHERE username = $1",
+      [userName]
+    );
+    data = res.rows[0] || null;
+  } catch (err) {
+    console.log('getAccountByUserName error:', err)
+    error = err;
+  } finally {
+    await client.end();
+  }
+  return { error, data };
 }
 
 const updateBalance = async ({userName, balance}) => {
@@ -190,8 +211,8 @@ const getSummaryReport = async () => {
           COALESCE(a.balance, 0) as "currentBalance",
           COALESCE(g.total_game, 0) as "totalGame"
       FROM accounts a
-      LEFT JOIN trans_agg t ON a.username = t.user_id
-      INNER JOIN game_agg g ON a.username = g.user_id
+      LEFT JOIN trans_agg t ON a.id = t.user_id
+      INNER JOIN game_agg g ON a.id = g.user_id
       ORDER BY a.username ASC
     `;
     const res = await client.query(query);
@@ -240,7 +261,16 @@ const getPokerLogById = async ({ pokerLogId }) => {
   let data = null;
   try {
     const res = await client.query(
-      "SELECT id, data, created_at FROM poker_log WHERE id = $1",
+      `
+        SELECT
+          id,
+          data,
+          created_at,
+          created_at + INTERVAL '1 hour' AS available_at,
+          created_at <= NOW() - INTERVAL '1 hour' AS is_available
+        FROM poker_log
+        WHERE id = $1
+      `,
       [pokerLogId]
     );
     data = res.rows[0] || null;
@@ -262,10 +292,10 @@ const resetBalanceAllPlayers = async () => {
       WITH updated AS (
         UPDATE accounts
         SET balance = 0
-        RETURNING username, balance as old_balance
+        RETURNING id, balance as old_balance
       )
       INSERT INTO transaction_log (user_id, amount, type, balance_after)
-      SELECT username, old_balance, 'withdraw', 0
+      SELECT id, old_balance, 'withdraw', 0
       FROM updated;
     `;
     await client.query(query);
@@ -284,6 +314,7 @@ module.exports = {
   createUser,
   getUser,
   getInfoAccount,
+  getAccountByUserName,
   updateBalance,
   logTransaction,
   logGame,

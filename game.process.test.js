@@ -85,7 +85,7 @@ describe('game process', () => {
         turn: '',
         river: '',
         finish: false,
-        firstActionPlayer: 2,
+        firstActionPlayer: 1,
         pot: [
           {
             users: [],
@@ -101,7 +101,6 @@ describe('game process', () => {
     game.startGame();
     game.playerAction({ type: 'BET', userName: 'a', betBalance: 4 });
 
-    game.preFlop();
     let newData = game.getData();
     expect(newData.position[2].isThinking).toBe(true);
     expect(newData.position[1].cards.length).toBe(2);
@@ -240,13 +239,88 @@ describe('game process', () => {
     game.startGame();
     let newData = game.getData();
     expect(newData.table.currentBet).toBe(2);
-    game.preFlop();
     newData = game.getData();
     expect(newData.position[1].isThinking).toBe(true);
 
     let rs = game.playerAction({ type: 'CALL', userName: 'a' })
     newData = game.getData();
     expect(rs.error).toBe(undefined);
+  })
+  test('hides other players result cards before finish', () => {
+    const data = {
+      setting: {
+        smallBlind: 1,
+      },
+      players,
+      position: {
+        1: {
+          user: {
+            userName: 'a',
+            accBalance: 20,
+          },
+          betBalance: 0,
+          isFold: false,
+          namePos: 'D',
+          cards: ['As', 'Ks'],
+          isThinking: false,
+          isPlaying: false,
+          resultCard: {
+            name: 'pair',
+            value: 2,
+          },
+        },
+        2: {
+          user: {
+            userName: 'b',
+            accBalance: 20,
+          },
+          betBalance: 0,
+          isFold: false,
+          namePos: '',
+          cards: ['Qs', 'Qs'],
+          isThinking: false,
+          isPlaying: false,
+          resultCard: {
+            name: 'pair',
+            value: 2,
+          },
+        },
+        3: {},
+        4: {},
+        5: {},
+        6: {},
+        7: {},
+        8: {},
+        9: {},
+      },
+      table: {
+        start: true,
+        preFlop: true,
+        flop: ['2s', '3s', '4s'],
+        turn: '5s',
+        river: '',
+        finish: false,
+        isShowDown: false,
+        firstActionPlayer: 2,
+        pot: [
+          {
+            users: [],
+            balance: 0,
+          }
+        ],
+        currentBet: 0,
+      },
+      cards,
+    }
+
+    game.setData(data);
+    const ownView = game.getRoomInfo({ userName: 'a' });
+    const otherView = game.getRoomInfo({ userName: 'b' });
+
+    expect(ownView.position[1].resultCard).toBeDefined();
+    expect(ownView.position[2].resultCard).toBeUndefined();
+    expect(otherView.position[1].resultCard).toBeUndefined();
+    expect(otherView.position[2].resultCard).toBeDefined();
   })
   test('process all in 1', () => {
 
@@ -406,7 +480,7 @@ describe('game process', () => {
   })
 
 
-  test('process fold 1', () => {
+  test('process fold 1', async () => {
 
     const data = {
       setting: {
@@ -498,7 +572,7 @@ describe('game process', () => {
     expect(!!newData.table.finish).toBe(true);
     expect(newData.table.flop.concat([newData.table.turn, newData.table.river]).length).toBe(5);
 
-    game.reset();
+    await game.reset();
     newData = game.getData();
     expect(newData.cards.length).toBe(52);
     expect(newData.position[1].cards.length).toBe(0);
@@ -938,7 +1012,6 @@ describe('game process', () => {
     game.setDealerPosition({ userName: '1' })
     game.startGame();
     game.playerAction({ type: 'BET', userName: '4', betBalance: 4 });
-    game.preFlop();
     newData = game.getData();
     expect(newData.position[5].isThinking).toBe(true)
     game.playerAction({ type: 'CALL', userName: '5' });

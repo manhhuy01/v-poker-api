@@ -141,7 +141,7 @@ const init = (http) => {
       let info = await db.getInfoAccount({ userName })
       socket.join(defaultRoom)
       socket.join(userName);
-      game.addPlayer({ userName, balance: info?.data?.balance })
+      game.addPlayer({ userName, userId: info?.data?.id, balance: info?.data?.balance })
       updateAllPlayer();
       io.to(defaultRoom).emit('chat', chat.getData());
 
