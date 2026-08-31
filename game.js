@@ -126,8 +126,6 @@ const getRoomInfo = ({ userName, showDownAt }) => {
           ...newData.position[pos],
           cards: newData.position[pos].cards.length ? ['u', 'u'] : [],
         }
-      }
-      if (!data.table.finish && newData.position[pos].user.userName !== userName) {
         delete newData.position[pos].resultCard
       }
       if (showDownAt) {
