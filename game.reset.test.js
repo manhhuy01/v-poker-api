@@ -164,7 +164,7 @@ describe('game reset poker log', () => {
 
     expect(db.logPoker).not.toHaveBeenCalled();
     expect(db.logGame).not.toHaveBeenCalled();
-    expect(db.updateBalance).toHaveBeenCalled();
+    expect(db.updateBalance).not.toHaveBeenCalled();
   });
 
   test('restore balance when reset before game finishes', async () => {

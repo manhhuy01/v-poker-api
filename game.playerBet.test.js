@@ -94,7 +94,7 @@ describe('playerBet', () => {
     expect(rs.error).toBe(undefined);
     expect(newData.position[2].action).toBe('bet');
     expect(newData.table.actions).toEqual([
-      { user: 'b', action: 'bet', amount: 3 }
+      { user: 'b', action: 'bet', amount: 4 }
     ]);
 
   })

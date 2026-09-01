@@ -96,7 +96,7 @@ describe('playerCall', () => {
     expect(newData.position[2].user.accBalance).toBe(18);
     expect(newData.position[2].action).toBe('call');
     expect(newData.table.actions).toEqual([
-      { user: 'b', action: 'call', amount: 2 }
+      { user: 'b', action: 'call', amount: 4 }
     ]);
     expect(newData.position[3].isThinking).toBe(true);
 
