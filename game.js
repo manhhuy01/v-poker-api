@@ -928,7 +928,7 @@ const playerAction = ({ userName, type, betBalance = 0, isAllIn = false }) => {
 
   if (!rs.error) {
     const newBetBalance = data.position[position].betBalance || 0;
-    const amount = Math.max(oldAccBalance - (data.position[position].user.accBalance || 0), 0);
+    const amount = Math.min(oldAccBalance, newBetBalance);
     let action = type.toLowerCase();
 
     if (type === 'BET') {

@@ -1101,4 +1101,312 @@ describe('game process', () => {
     expect(newData.table.finish).toBe(true)
 
   })
+
+  test('process normal-full-2', () => {
+
+    const data = {
+      "cards": [
+        "7s",
+        "5c",
+        "Qc",
+        "5d",
+        "Qd",
+        '2h',
+        "10h",
+        'Ks',
+        "Jh",
+        "7c",
+        "3s",
+        "9d",
+        "10s",
+        "10c",
+        "4c",
+        "6c",
+        "2d",
+        "10d",
+        "8d",
+        "Kc",
+        "Js",
+        "Ad",
+        "6s",
+        "6d",
+        "7h",
+        "7d",
+        "3c",
+        "As",
+        "9c",
+        "4d",
+        "2c",
+        "Ac",
+        "Kd",
+        "4s",
+        "8h",
+        "3h",
+        "Qs",
+        "Kh",
+      ],
+      "table": {
+        "pot": [
+          {
+            "users": [],
+            "balance": 0,
+            "isHavePlayerAllIn": false
+          }
+        ],
+        "start": true,
+        "finish": false,
+        "preFlop": true,
+        "currentBet": 2,
+        "isShowDown": false,
+        "firstActionPlayer": 8
+      },
+      "dealer": "nhat",
+      "players": [
+        {
+          "userId": "7",
+          "userName": "nhat",
+          "accBalance": 16,
+          "startBalance": 16
+        },
+        {
+          "userId": "28",
+          "userName": "cuongvu",
+          "accBalance": 127,
+          "startBalance": 127
+        },
+        {
+          "userId": "3",
+          "userName": "lycuong99",
+          "accBalance": 74,
+          "startBalance": 76
+        },
+        {
+          "userId": "10",
+          "userName": "daodaobao",
+          "accBalance": 34,
+          "startBalance": 34
+        },
+        {
+          "userId": "1",
+          "userName": "manhhuy01",
+          "accBalance": 109,
+          "startBalance": 109
+        },
+        {
+          "userId": "2",
+          "userName": "tuan",
+          "accBalance": 112,
+          "startBalance": 112
+        },
+        {
+          "userId": "24",
+          "userName": "haha",
+          "accBalance": 126,
+          "startBalance": 126
+        },
+      ],
+      "setting": {
+        "smallBlind": 1
+      },
+      "position": {
+        "1": {
+          "user": {
+            "userId": "28",
+            "userName": "cuongvu",
+            "accBalance": 127,
+            "startBalance": 127
+          },
+          "cards": [
+            "6h",
+            "9h"
+          ],
+          "action": "",
+          "isFold": false,
+          "namePos": "",
+          "showCard": false,
+          "isPlaying": true,
+          "betBalance": 0,
+          "isThinking": false,
+          "winBalance": 0
+        },
+        "2": {
+          "user": {
+            "userId": "1",
+            "userName": "manhhuy01",
+            "accBalance": 109,
+            "startBalance": 109
+          },
+          "cards": [
+            "4h",
+            "5h"
+          ],
+          "action": "",
+          "isFold": false,
+          "namePos": "",
+          "showCard": false,
+          "isPlaying": true,
+          "betBalance": 0,
+          "isThinking": false,
+          "winBalance": 0
+        },
+        "3": {
+          "user": {
+            "userId": "7",
+            "userName": "nhat",
+            "accBalance": 16,
+            "startBalance": 16
+          },
+          "cards": [
+            "5s",
+            "Jd"
+          ],
+          "action": "",
+          "isFold": false,
+          "namePos": "D",
+          "showCard": false,
+          "isPlaying": true,
+          "betBalance": 0,
+          "isThinking": false,
+          "winBalance": 0
+        },
+        "4": {
+          "user": {
+            "userId": "10",
+            "userName": "daodaobao",
+            "accBalance": 33,
+            "startBalance": 34
+          },
+          "cards": [
+            "2s",
+            "8s"
+          ],
+          "action": "",
+          "isFold": false,
+          "namePos": "",
+          "showCard": false,
+          "isPlaying": true,
+          "betBalance": 1,
+          "isThinking": false,
+          "winBalance": 0
+        },
+        "5": {
+          "cards": [],
+          "action": "",
+          "isFold": false,
+          "namePos": "",
+          "showCard": false,
+          "isPlaying": false,
+          "betBalance": 0,
+          "isThinking": false,
+          "winBalance": 0
+        },
+        "6": {
+          "cards": [],
+          "action": "",
+          "isFold": false,
+          "namePos": "",
+          "showCard": false,
+          "isPlaying": false,
+          "betBalance": 0,
+          "isThinking": false,
+          "winBalance": 0
+        },
+        "7": {
+          "user": {
+            "userId": "3",
+            "userName": "lycuong99",
+            "accBalance": 74,
+            "startBalance": 76
+          },
+          "cards": [
+            "9s",
+            "8c"
+          ],
+          "action": "",
+          "isFold": false,
+          "namePos": "",
+          "showCard": false,
+          "isPlaying": true,
+          "betBalance": 2,
+          "isThinking": false,
+          "winBalance": 0
+        },
+        "8": {
+          "user": {
+            "userId": "2",
+            "userName": "tuan",
+            "accBalance": 112,
+            "startBalance": 112
+          },
+          "cards": [
+            "Qh",
+            "Jc"
+          ],
+          "action": "",
+          "isFold": false,
+          "namePos": "",
+          "showCard": false,
+          "isPlaying": true,
+          "betBalance": 0,
+          "isThinking": true,
+          "winBalance": 0
+        },
+        "9": {
+          "user": {
+            "userId": "24",
+            "userName": "haha",
+            "accBalance": 126,
+            "startBalance": 126
+          },
+          "cards": [
+            "Ah",
+            "3d"
+          ],
+          "action": "",
+          "isFold": false,
+          "namePos": "",
+          "showCard": false,
+          "isPlaying": true,
+          "betBalance": 0,
+          "isThinking": false,
+          "winBalance": 0
+        }
+      }
+    };
+    let newData;
+
+    game.setData(data);
+    // preflop
+    game.playerAction({ type: 'CALL', userName: 'tuan' });
+    game.playerAction({ type: 'CALL', userName: 'haha' });
+    game.playerAction({ type: 'FOLD', userName: 'cuongvu', });
+    game.playerAction({ type: 'CALL', userName: 'manhhuy01', });
+    game.playerAction({ type: 'CALL', userName: 'nhat', });
+    game.playerAction({ type: 'FOLD', userName: 'daodaobao', });
+    game.playerAction({ type: 'CHECK', userName: 'lycuong99', });
+    // flop
+    game.playerAction({ type: 'CHECK', userName: 'lycuong99', });
+    game.playerAction({ type: 'CHECK', userName: 'tuan', });
+    game.playerAction({ type: 'CHECK', userName: 'haha', });
+    game.playerAction({ type: 'BET', userName: 'manhhuy01', betBalance: 4 });
+    game.playerAction({ type: 'BET', userName: 'nhat', betBalance: 8 });
+    game.playerAction({ type: 'FOLD', userName: 'lycuong99', });
+    game.playerAction({ type: 'CALL', userName: 'tuan', });
+    game.playerAction({ type: 'CALL', userName: 'haha', });
+    game.playerAction({ type: 'BET', userName: 'manhhuy01', betBalance: 16 });
+    game.playerAction({ type: 'BET', userName: 'nhat', betBalance: 6, isAllIn: true });
+    game.playerAction({ type: 'CALL', userName: 'tuan', });
+    game.playerAction({ type: 'FOLD', userName: 'haha', });
+    // turn
+    game.playerAction({ type: 'CHECK', userName: 'tuan', });
+    game.playerAction({ type: 'BET', userName: 'manhhuy01', betBalance: 8 });
+    game.playerAction({ type: 'CALL', userName: 'tuan', });
+    // river
+    game.playerAction({ type: 'CHECK', userName: 'tuan', });
+    game.playerAction({ type: 'BET', userName: 'manhhuy01', betBalance: 20 });
+    game.playerAction({ type: 'CALL', userName: 'tuan', });
+
+    newData = game.getData();
+    expect(newData.table.actions['15'].amount).toBe(16);
+  })
 })
