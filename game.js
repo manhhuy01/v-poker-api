@@ -987,15 +987,13 @@ const reset = async () => {
           db.logGame({ userId: data.position[p].user.userId, amount: newAccBalance - oldAccBalance, type: 'win', balanceAfter: newAccBalance, pokerLogId });
         }
       }
-
-      data.position[p].user.accBalance = newAccBalance;
-      data.position[p].user.startBalance = newAccBalance;
-      db.updateBalance({ userName: data.position[p].user.userName, balance: data.position[p].user.accBalance })
-      data.position[p].winBalance = 0;
-    }
-    if (data.position[p].cards?.length) {
-      data.cards.push(...data.position[p].cards)
-      data.position[p].cards = []
+      if (shouldLogGame) {
+        data.position[p].user.accBalance = newAccBalance;
+        data.position[p].user.startBalance = newAccBalance;
+        db.updateBalance({ userName: data.position[p].user.userName, balance: data.position[p].user.accBalance })
+      } else {
+        data.position[p].user.accBalance = data.position[p].user.startBalance;
+      }
     }
     data.position[p] = {
       ...POSITION,
@@ -1003,16 +1001,7 @@ const reset = async () => {
       namePos: data.position[p].namePos,
     }
   })
-  if (data.table.flop) {
-    data.cards.push(...data.table.flop);
-  }
-  if (data.table.turn) {
-    data.cards.push(data.table.turn)
-  }
-  if (data.table.river) {
-    data.cards.push(data.table.river)
-  }
-  data.cards = JSON.parse(JSON.stringify(initCards))
+  data.cards = [...initCards]
   data.table = JSON.parse(JSON.stringify(initTable))
 }
 
