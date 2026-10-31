@@ -114,6 +114,9 @@ const addPlayer = ({ userName, userId, balance }) => {
 const getRoomInfo = ({ userName, showDownAt }) => {
   let newData = JSON.parse(JSON.stringify(data));
   delete newData.cards
+  // showDownAt là mốc bắt đầu show bài: các frame 'flop' | 'turn' | 'river'
+  // chỉ lật dần bài chung, riêng frame 'space' mới lật đủ toàn bộ board.
+  const isFullBoardRevealed = showDownAt === 'space'
   Object.keys(data.position).forEach((pos) => {
     if (newData.position[pos].user) {
       let player = data.players.find(x => x.userName === newData.position[pos].user.userName);
@@ -130,6 +133,12 @@ const getRoomInfo = ({ userName, showDownAt }) => {
       }
       if (showDownAt) {
         delete newData.position[pos].winBalance
+
+        // resultCard (kèm analyticCards) được tính với board cuối cùng nên
+        // chỉ được lộ khi đã lật đủ bài, tránh lộ turn/river ngay frame đầu.
+        if (!isFullBoardRevealed) {
+          delete newData.position[pos].resultCard
+        }
       }
     }
   })

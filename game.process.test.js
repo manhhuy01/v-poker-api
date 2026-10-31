@@ -322,6 +322,125 @@ describe('game process', () => {
     expect(otherView.position[1].resultCard).toBeUndefined();
     expect(otherView.position[2].resultCard).toBeDefined();
   })
+  test('only reveals result card and analytic on the river frame of showdown', () => {
+    const resultCard = {
+      name: 'straightFlush',
+      value: 9,
+      cards: ['As', 'Ks', 'Qs', 'Js', '10s'],
+      analyticCards: ['As', 'Ks', 'Qs', 'Js', '10s', '2d', '3c'],
+    }
+    const data = {
+      setting: {
+        smallBlind: 1,
+      },
+      players: [
+        { userName: 'a', accBalance: 90 },
+        { userName: 'b', accBalance: 0 },
+      ],
+      position: {
+        1: {
+          user: {
+            userName: 'a',
+            accBalance: 90,
+            startBalance: 100,
+          },
+          betBalance: 0,
+          isFold: false,
+          namePos: 'D',
+          cards: ['As', 'Ks'],
+          isThinking: false,
+          isPlaying: true,
+          winBalance: 200,
+          showCard: false,
+          action: '',
+          resultCard,
+        },
+        2: {
+          user: {
+            userName: 'b',
+            accBalance: 0,
+            startBalance: 100,
+          },
+          betBalance: 0,
+          isFold: false,
+          namePos: '',
+          cards: ['Qh', 'Qd'],
+          isThinking: false,
+          isPlaying: true,
+          winBalance: 0,
+          showCard: false,
+          action: '',
+          resultCard: {
+            name: 'totk',
+            value: 4,
+            cards: ['Qh', 'Qd', 'Qs', 'Js', '10s'],
+            analyticCards: ['Qh', 'Qd', 'Qs', 'Js', '10s', '2d', '3c'],
+          },
+        },
+        3: {},
+        4: {},
+        5: {},
+        6: {},
+        7: {},
+        8: {},
+        9: {},
+      },
+      table: {
+        start: true,
+        preFlop: true,
+        flop: ['Qs', 'Js', '10s'],
+        turn: '2d',
+        river: '3c',
+        finish: true,
+        isShowDown: true,
+        showDownAt: 'flop',
+        firstActionPlayer: 1,
+        pot: [
+          {
+            users: [],
+            balance: 0,
+          }
+        ],
+        currentBet: 0,
+      },
+      cards,
+    }
+
+    game.setData(data);
+
+    // Các frame lật bài dần chỉ được lộ bài chung tương ứng,
+    // chưa được lộ resultCard/analyticCards của board cuối cùng.
+    const flopFrame = game.getRoomInfo({ userName: 'a', showDownAt: 'flop' });
+    expect(flopFrame.table.flop).toBeUndefined();
+    expect(flopFrame.position[1].resultCard).toBeUndefined();
+    expect(flopFrame.position[2].resultCard).toBeUndefined();
+    expect(JSON.stringify(flopFrame)).not.toMatch(/10s|2d|3c/);
+
+    const turnFrame = game.getRoomInfo({ userName: 'a', showDownAt: 'turn' });
+    expect(turnFrame.table.flop).toEqual(['Qs', 'Js', '10s']);
+    expect(turnFrame.position[1].resultCard).toBeUndefined();
+    expect(turnFrame.position[2].resultCard).toBeUndefined();
+    expect(JSON.stringify(turnFrame)).not.toMatch(/2d|3c/);
+
+    const riverFrame = game.getRoomInfo({ userName: 'a', showDownAt: 'river' });
+    expect(riverFrame.table.turn).toBe('2d');
+    expect(riverFrame.table.river).toBeUndefined();
+    expect(riverFrame.position[1].resultCard).toBeUndefined();
+    expect(riverFrame.position[2].resultCard).toBeUndefined();
+    expect(JSON.stringify(riverFrame)).not.toContain('3c');
+    expect(riverFrame.position[1].winBalance).toBeUndefined();
+
+    // Đủ board (frame 'space') mới lộ result + analytic, tiền thắng vẫn chờ frame cuối.
+    const riverRevealedFrame = game.getRoomInfo({ userName: 'a', showDownAt: 'space' });
+    expect(riverRevealedFrame.table.river).toBe('3c');
+    expect(riverRevealedFrame.position[1].resultCard).toEqual(resultCard);
+    expect(riverRevealedFrame.position[2].resultCard).toBeDefined();
+    expect(riverRevealedFrame.position[1].winBalance).toBeUndefined();
+
+    const finalFrame = game.getRoomInfo({ userName: 'a' });
+    expect(finalFrame.position[1].resultCard).toEqual(resultCard);
+    expect(finalFrame.position[1].winBalance).toBe(200);
+  })
   test('process all in 1', () => {
 
     const data = {
