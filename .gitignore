@@ -1,2 +1,6 @@
 node_modules
 .vscode
+
+# Cloudflare / local dev (nhánh poker-v2 để lại khi switch branch)
+.dev.vars
+.wrangler
