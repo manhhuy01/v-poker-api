@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS accounts (
   password text null,
   token text null,
   balance smallint null,
-  constraint accounts_pkey primary key (id)
+  constraint accounts_pkey primary key (id),
   constraint accounts_unique unique (username)
 ) TABLESPACE pg_default;
 
