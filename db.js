@@ -4,13 +4,29 @@ const Cryptr = require('cryptr');
 const cryptr = new Cryptr('manhhuy-v-poker-keys');
 const saltRounds = 10;
 
-const dbConfig = {
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_DATABASE,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
-  ssl: { rejectUnauthorized: false }
+// Ưu tiên DATABASE_URL (connection string kiểu Neon/Supabase/Postgres khác) nếu có;
+// khi đó bỏ qua hoàn toàn 5 biến DB_USER/DB_HOST/DB_DATABASE/DB_PASSWORD/DB_PORT.
+// Không có DATABASE_URL thì dùng cấu hình rời như cũ (Render).
+const connectionString = process.env.DATABASE_URL;
+
+const dbConfig = connectionString
+  ? {
+      connectionString,
+      // URL không có ?sslmode=... thì vẫn bật SSL kiểu cũ (không verify CA).
+      // Nếu URL có sslmode thì pg dùng theo URL đó.
+      ssl: { rejectUnauthorized: false },
+    }
+  : {
+      user: process.env.DB_USER,
+      host: process.env.DB_HOST,
+      database: process.env.DB_DATABASE,
+      password: process.env.DB_PASSWORD,
+      port: process.env.DB_PORT,
+      ssl: { rejectUnauthorized: false }
+    }
+
+if (connectionString) {
+  console.log('db: dùng DATABASE_URL (bỏ qua DB_USER/DB_HOST/DB_DATABASE/DB_PASSWORD/DB_PORT)');
 }
 
 const createUser = async ({ userName, password }) => {
