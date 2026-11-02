@@ -4,6 +4,7 @@ const game = require('./game')
 const chat = require('./chat')
 const db = require('./db')
 const utils = require('./utils.js')
+const { socketCorsOptions } = require('./corsConfig')
 let io
 
 let chainUpdate = false;
@@ -125,10 +126,7 @@ const notifyToAllPlayer = (data) => {
 
 const init = (http) => {
   io = require('socket.io')(http, {
-    cors: {
-      origin: '*',
-      methods: ['GET', 'POST', 'DELETE']
-    }
+    cors: socketCorsOptions
   });
 
   io.on("connection", async (socket) => {

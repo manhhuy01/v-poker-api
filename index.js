@@ -12,18 +12,7 @@ const report = require('./report')
 
 const cors = require('cors');
 const socket = require('./socket');
-
-var whitelist = ['http://localhost:3000', 'https://v-poker.vercel.app', 'http://192.168.101.35:3000']
-var corsOptions = {
-  credentials: true,
-  origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1 || !origin) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
-    }
-  }
-}
+const { corsOptions } = require('./corsConfig');
 
 
 app.use(cookieParser())
