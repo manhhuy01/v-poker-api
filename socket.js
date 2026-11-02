@@ -2,6 +2,7 @@ const Cryptr = require('cryptr');
 const cryptr = new Cryptr('manhhuy-v-poker-keys');
 const game = require('./game')
 const chat = require('./chat')
+const charm = require('./charm')
 const db = require('./db')
 const utils = require('./utils.js')
 const { socketCorsOptions } = require('./corsConfig')
@@ -149,6 +150,14 @@ const init = (http) => {
         players.forEach((player) => {
           io.to(player.userName).emit('chat', chat.getData());
         })
+      })
+
+      // userName comes from the verified token, not from the client payload.
+      socket.on('sendCharm', ({ type } = {}) => {
+        const rs = charm.createCharm({ userName, type })
+        if (rs.charm) {
+          io.to(defaultRoom).emit('charm', rs.charm)
+        }
       })
 
       socket.on('disconnect', async () => {
