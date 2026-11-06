@@ -1,5 +1,6 @@
 const utils = require('./utils')
 const db = require('./db')
+const { getPositionNames } = require('./positions')
 
 const initCards = [
   '2s', '3s', '4s', '5s', '6s', '7s', '8s', '9s', '10s', 'Js', 'Qs', 'Ks', 'As',
@@ -231,6 +232,9 @@ const joinTable = ({ userName, position }) => {
   if (Object.values(data.position).map(x => !!x.user).filter(Boolean).length === 1) {
     setDealerPosition({ userName })
   }
+  if (canUpdatePositionNames()) {
+    updatePositionNames();
+  }
   return {}
 }
 
@@ -316,6 +320,13 @@ const removeFromTable = ({ userName }) => {
     }
   }
 
+  // Ghế trống không còn giữ tên vị trí: tính lại D, SB, BB, ... cho các ghế còn lại.
+  // Đang giữa ván thì không đổi vị trí của những người còn lại (họ đã đánh theo
+  // vị trí lúc chia bài), ván sau reset sẽ tính lại.
+  if (canUpdatePositionNames()) {
+    updatePositionNames();
+  }
+
   return {}
 }
 
@@ -367,6 +378,40 @@ const isShowDown = () => {
     .length < 2
 }
 
+// Gán lại tên vị trí (D, SB, BB, UTG, ...) cho các ghế đang có người, đi theo
+// chiều thuận của sòng bài tính từ ghế dealer. Ghế trống không có tên, và bàn
+// ít người hơn 9 ghế thì bỏ bớt vị trí theo thứ tự ưu tiên trong positions.js.
+// Giữa ván thì giữ nguyên tên vị trí đã dùng để chia bài/chia tiền, chỉ tính lại
+// khi bàn không ở giữa ván: ghế đổi người, hết ván, reset...
+const canUpdatePositionNames = () => !data.table?.start || !!data.table?.finish
+
+const updatePositionNames = () => {
+  const seats = Object.keys(data.position).map(Number).sort((a, b) => a - b)
+  const dealerSeat = seats.find((seat) => data.position[seat]?.namePos === 'D')
+  seats.forEach((seat) => {
+    // ghế trống giữ nguyên {} (không thêm namePos rỗng vào ghế không có người)
+    if (data.position[seat]?.user) {
+      data.position[seat].namePos = ''
+    }
+  })
+  if (!dealerSeat || !data.position[dealerSeat]?.user) {
+    return
+  }
+
+  const seatsFromDealer = []
+  const dealerIndex = seats.indexOf(dealerSeat)
+  seats.forEach((_, index) => {
+    const seat = seats[(dealerIndex + index) % seats.length]
+    if (data.position[seat]?.user) {
+      seatsFromDealer.push(seat)
+    }
+  })
+  const names = getPositionNames(seatsFromDealer.length)
+  seatsFromDealer.forEach((seat, index) => {
+    data.position[seat].namePos = names[index] || ''
+  })
+}
+
 const setDealerPosition = ({ userName }) => {
   if (data.table.start) {
     return { error: 'Ván đã bắt đầu không set dealer lại được' }
@@ -381,9 +426,9 @@ const setDealerPosition = ({ userName }) => {
     return { error: 'Người này không trên bàn chơi' }
 
   }
-  const totalPlayerOnTable = Object.keys(data.position).map(x => data.position[x].user).filter(Boolean).length;
   Object.keys(data.position).forEach((p) => data.position[p].namePos = '')
   data.position[position].namePos = 'D';
+  updatePositionNames();
 
   return {}
 }
@@ -1057,6 +1102,9 @@ const reset = async () => {
     data.position[dealerPosition].namePos = ''
     data.position[nextDealerPosition].namePos = 'D'
   }
+  // Nút dealer vừa chuyển sang ghế kế tiếp nên phải tính lại toàn bộ tên vị trí
+  // trước khi reset từng ghế (reset giữ lại namePos của ghế).
+  updatePositionNames();
   Object.keys(data.position).forEach(p => {
     if (data.position[p].user) {
 

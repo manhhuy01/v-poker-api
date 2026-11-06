@@ -151,6 +151,7 @@ describe('game.removeFromTable', () => {
     const newData = game.getData()
     expect(newData.position[1]).toEqual({})
     expect(newData.position[2].namePos).toBe('D')
+    // đang giữa ván nên vị trí của người còn lại được giữ nguyên, ván sau reset mới tính lại
     expect(newData.position[3].namePos).toBe('')
   })
 
