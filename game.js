@@ -234,14 +234,88 @@ const joinTable = ({ userName, position }) => {
   return {}
 }
 
+const findNextOccupiedPosition = ({ position }) => {
+  const totalPosition = Object.keys(data.position).length;
+  let curPosition = +position;
+  for (let i = 0; i < totalPosition; i++) {
+    curPosition = curPosition >= totalPosition ? 1 : curPosition + 1;
+    if (data.position[curPosition]?.user) {
+      return curPosition;
+    }
+  }
+  return undefined;
+}
+
 const removeFromTable = ({ userName }) => {
   let position = Object.keys(data.position).find(x => data.position[x]?.user?.userName === userName);
   if (!position) return { error: 'Không tim thấy ng này trên bàn' }
-  if (data.position[position].isPlaying) {
-    return { error: 'Đang chơi không remove đc' }
+
+  const playerPosition = data.position[position]
+  const isHandInProgress = !!(data.table.start && !data.table.finish);
+
+  // Đang trong ván thì chỉ được rời bàn khi đã fold: người chưa fold vẫn còn
+  // lượt action, xoá ghế giữa ván sẽ làm hỏng lượt chơi của cả bàn.
+  if (isHandInProgress && playerPosition.isPlaying && !playerPosition.isFold) {
+    return { error: 'Đang trong ván bài, chỉ được rời bàn sau khi đã fold' }
+  }
+
+  const user = playerPosition.user
+  const isDealerPosition = playerPosition.namePos === 'D'
+
+  if (playerPosition.isPlaying) {
+    // betBalance chưa được gom vào pot ngay mà đợi hết vòng cược, nên trước khi
+    // xoá ghế phải gom phần tiền đã cược vào pot để tiền của ván không bị mất.
+    const betBalance = playerPosition.betBalance || 0;
+    if (betBalance > 0) {
+      if (playerPosition.isFold) {
+        const currentPot = data.table.pot[data.table.pot.length - 1];
+        if (currentPot) {
+          currentPot.balance += betBalance;
+        }
+      } else {
+        // ván đã kết thúc nhưng chưa reset: trả lại tiền chưa được gom
+        user.accBalance += betBalance;
+      }
+      playerPosition.betBalance = 0;
+    }
+    if (playerPosition.winBalance > 0) {
+      user.accBalance += playerPosition.winBalance;
+      playerPosition.winBalance = 0;
+    }
+    // reset() chỉ cập nhật DB cho những ghế còn trên bàn, nên người rời bàn giữa ván
+    // phải tự cập nhật số dư + ghi log game tại đây, tránh bị hoàn tiền khi login lại.
+    if (data.table.start) {
+      if (user.userId && user.startBalance !== undefined) {
+        const amount = user.startBalance - user.accBalance;
+        if (amount > 0) {
+          db.logGame({ userId: user.userId, amount, type: 'lose', balanceAfter: user.accBalance });
+        } else if (amount < 0) {
+          db.logGame({ userId: user.userId, amount: -amount, type: 'win', balanceAfter: user.accBalance });
+        }
+      }
+      db.updateBalance({ userName: user.userName, balance: user.accBalance });
+    }
   }
 
   data.position[position] = {}
+
+  // firstActionPlayer đánh dấu vị trí kết thúc vòng cược. Nếu người rời bàn đang giữ
+  // vị trí này thì phải chuyển sang ghế kế tiếp còn chơi, nếu không vòng cược sẽ
+  // không bao giờ kết thúc (findNextPosition bỏ qua ghế trống).
+  if (+data.table.firstActionPlayer === +position) {
+    const nextActionPosition = findNextPosition({ position });
+    data.table.firstActionPlayer = +nextActionPosition === +position ? undefined : nextActionPosition;
+  }
+
+  // nút dealer (namePos = 'D') phải được chuyển sang ghế còn người,
+  // nếu không ván sau (và cả các vòng cược sau) sẽ không tìm thấy dealer.
+  if (isDealerPosition) {
+    const nextPosition = findNextOccupiedPosition({ position });
+    if (nextPosition) {
+      data.position[nextPosition].namePos = 'D';
+    }
+  }
+
   return {}
 }
 
