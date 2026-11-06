@@ -153,8 +153,8 @@ const init = (http) => {
       })
 
       // userName comes from the verified token, not from the client payload.
-      socket.on('sendCharm', ({ type } = {}) => {
-        const rs = charm.createCharm({ userName, type })
+      socket.on('sendCharm', ({ type, value } = {}) => {
+        const rs = charm.createCharm({ userName, type, value })
         if (rs.charm) {
           io.to(defaultRoom).emit('charm', rs.charm)
         }
