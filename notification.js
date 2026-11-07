@@ -3,15 +3,10 @@ const socket = require('./socket');
 const notification = (req, res, next) => {
   switch (req.path) {
     case '/player/action':
-      let indexSound = undefined;
-      if(req.body.type == 'BET') {
-        indexSound = Math.round(Math.random()*100);
-      }
-      socket.notifyToAllPlayer({ 
-        id: Math.random(), 
-        action: req.body.type, 
+      socket.notifyToAllPlayer({
+        id: Math.random(),
+        action: req.body.type,
         userName: req?.user?.userName,
-        indexSound,
       })
       break;
     case '/player/tip':
